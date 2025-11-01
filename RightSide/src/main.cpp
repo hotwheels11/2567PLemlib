@@ -20,11 +20,12 @@ void on_center_button() {
 
 // Global selector instance
 void initialize() {
-    // Initialize robodash components first
-	pros::lcd::initialize();
-	chassis.calibrate(); // calibrate sensors
+    pros::lcd::initialize();
+    master.set_text(0, 0, "1");
 
-	pros::lcd::register_btn1_cb(on_center_button);
+    chassis.calibrate();          // make sure chassis is ready
+    pros::lcd::register_btn1_cb(on_center_button);
+    pros::Task coordDisplayTask(Coords);
 }
 
 /**
@@ -58,7 +59,7 @@ void competition_initialize() {}
  */
 void autonomous() {
     chassis.setPose(0, 0, 0);
-	Descore(1);
+	Descore.set_value(1);
     chassis.moveToPoint(0, 13, 1000);
     intake.move(127);
     chassis.moveToPoint(9.0, 28, 1000);//get first three balls
@@ -87,7 +88,7 @@ void autonomous() {
     chassis.moveToPoint(36, 29, 1000,{.forwards=false,.maxSpeed=70}); //backs out of matchload area
     pros::delay(1000);
     Matchload.set_value(0); //Deactivates
-    Descore(0);
+    Descore.set_value(0);
 }
 
 /**
@@ -103,74 +104,100 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
- int descore = 1;
- int intakelift = 1;
+ int descore = 0;
+ int park = 0;
  int MatchloadMech = 0;
-void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
+ int hoodmech=0;
 
-		// Arcade control scheme
-		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+void opcontrol() {
+    pros::Task ParkTask(enableButtonTask); // Start the background timer when driver begins
+    pros::Task DistanceTask(activePosition);
+    chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+    while (true) {
+        pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+                         (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
+                         (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
+
+        // Arcade control scheme
+        int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
         // move the robot
-        chassis.tank(leftY, rightY);                  // Sets right motor voltage  
-		std::stringstream ss;
-		ss << std::fixed << std::setprecision(1) // change 1 to however many decimals you want
-		<< "(" << chassis.getPose().x << ", "
-		<< chassis.getPose().y << ", "
-		<< chassis.getPose().theta << ")";
-		master.set_text(0, 0, ss.str());
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
-		descore++;
-		if (descore % 2 == 0){
-			DescoreLeft.set_value(true);
-			DescoreRight.set_value(true);
-		}
-		}
-		if (descore % 2 == 1){
-		DescoreLeft.set_value(false);
-		DescoreRight.set_value(false);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)){
-		intakelift++;
-		if (intakelift % 2 == 0){
-			IntakeLift.set_value(true);
-		} 
-		}
-		if (intakelift % 2 == 1){
-		IntakeLift.set_value(false);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)){
-		MatchloadMech++;
-		if (MatchloadMech % 2 == 0){
-			Matchload.set_value(true);
-		}
-		}
-		if (MatchloadMech % 2 == 1){
-		Matchload.set_value(false);
-		}
-		
-		if (master.get_digital(DIGITAL_R2)) {
-		intake.move(-127);
-		intakelate.move(-127);
-		} else if (master.get_digital(DIGITAL_R1)) {
-		intake.move(127);
-		intakelate.move(127);
-		} else if (master.get_digital(DIGITAL_L2)) {
-		intake.move(-127);
-		intakelate.move(127);
-		} else if (master.get_digital(DIGITAL_L1)) {
-		intake.move(127);
-		intakelate.move(-127);
-		} else {
-		intake.move(0);
-		intakelate.move(0);
-		}
-	pros::delay(20);    
-	}
+        chassis.tank(leftY, rightY);                  // Sets right motor voltage
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)){
+        descore++;
+        if (descore % 2 == 1){
+            Descore.set_value(true);
+        }
+
+        }
+        if (descore % 2 == 0){
+        Descore.set_value(0);
+        }
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
+        hoodmech++;
+        if (hoodmech % 2 == 0){
+            Hood.set_value(0);
+        }
+        }
+        if (hoodmech % 2 == 1){
+        Hood.set_value(1);
+        }
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)){
+        park++;
+        if (park % 2 == 1){
+            Park.set_value(1);
+        }
+        }
+        if (park % 2 == 0){
+        Park.set_value(0);
+        }
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)){
+        MatchloadMech++;
+        if (MatchloadMech % 2 == 0){
+            Matchload.set_value(true);
+        }
+        }
+        if (MatchloadMech % 2 == 1){
+        Matchload.set_value(false);
+        }
+        
+        if (master.get_digital(DIGITAL_R2)) {
+        intake.move(-127);
+        intakelate.move(-127);
+        } else if (master.get_digital(DIGITAL_R1)) {
+        intake.move(127);
+        intakelate.move(127);
+        } else if (master.get_digital(DIGITAL_L2)) {
+        intake.move(-127);
+        intakelate.move(127);
+        } else if (master.get_digital(DIGITAL_L1)) {
+        intake.move(127);
+        intakelate.move(-127);
+        } else {
+        intake.move(0);
+        intakelate.move(0);
+        }
+
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+            if (buttonEnabled) {
+                intake.move(-127);  // Start intake
+
+                // Wait until inPosition becomes true
+                while (!inPosition) {
+                    pros::delay(10);  // small delay to avoid hogging CPU
+                }
+
+                intake.move(0);       // Stop intake
+                park=1;
+                Park.set_value(1);
+                pros::delay(100);
+
+                inPosition = false;   // Reset for next use
+            } else {
+                master.rumble(".."); // Not ready yet
+            }
+        }
+
+    pros::delay(20);
+    }
 }

@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Right Side",
+    "project_name": "NormLineUp",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -326,8 +326,10 @@
       }
     },
     "upload_options": {
-      "slot": 2,
-      "after": "run"
+      "slot": 3,
+      "after": "run",
+      "icon": "X",
+      "description": "The Line Up Code for the two Basic Autos"
     },
     "use_early_access": false
   }
