@@ -154,41 +154,41 @@ void calculatePoseAuto() {
 void Skills_Auto(){
     setChassisToSavedPose(); // sets the chassis to previously saved position
     Descore.set_value(1);
-    chassis.moveToPoint(46,43,1000,{.maxSpeed=80});
+    chassis.moveToPoint(46,43,1000,{.maxSpeed=80}); //Goes fwd to get perpendiuclar for matchload #1
     chassis.waitUntilDone();
-    chassis.turnToHeading(90,900);
+    chassis.turnToHeading(90,900); // Turns towards Matchload #1
     chassis.waitUntilDone();
-    pros::delay(200);
-    Matchload.set_value(1);
-    chassis.moveToPoint(60,50,2800,{.maxSpeed=60});
+    pros::delay(300); //Allows time for matchload to Deploy
+    Matchload.set_value(1);//Deploys Matchload
+    chassis.moveToPoint(60,50,2800,{.maxSpeed=60}); //Driveinto matchloadpoing while intake (timeoutcontrolls the length of intake)
     intake.move(127);
     chassis.waitUntilDone();
-    Matchload.set_value(0);
-    chassis.moveToPoint(49.1,50,800,{.forwards=false});
+    Matchload.set_value(0); //PicksUp Matchload
+    chassis.moveToPoint(49.1,50,800,{.forwards=false});//Reverses out of Matchload #1
     chassis.waitUntilDone();
-    chassis.turnToHeading(-50,900);
+    chassis.turnToHeading(-45,900); //Turns towards the alley way
     chassis.waitUntilDone();
-    chassis.moveToPoint(30,62.5,1000,{.maxSpeed=100});
-    chassis.waitUntil(12);
-    chassis.cancelMotion();
-    chassis.moveToPoint(-25,61.3,2000,{.maxSpeed=100});
-    chassis.waitUntil(60);
-    chassis.cancelMotion();
-    chassis.moveToPoint(-43,5,1500,{.maxSpeed=80});
+    chassis.moveToPoint(30,62,1000,{.maxSpeed=100}); // Attempts to get next to the long goal support
+    chassis.waitUntil(12); //waits until 12 inches has passed
+    chassis.cancelMotion(); //Stops attempting to go to previous point
+    chassis.moveToPoint(-25,61,2000,{.maxSpeed=100}); //Attempts to go to the second point next to the opposite end of long goal
+    chassis.waitUntil(60);//Waits until 12 inches has passed
+    chassis.cancelMotion();//stops trying to go to previous point
+    chassis.moveToPoint(-43,49,1500,{.maxSpeed=80}); //Gets infront of long goal
     chassis.waitUntilDone();
-    chassis.turnToHeading(-90,900);
+    chassis.turnToHeading(-90,900); //Turn the back to the goal
     chassis.waitUntilDone();
-    chassis.moveToPoint(-25,49,2200,{.forwards=false,.maxSpeed=60});
-    chassis.waitUntil(8);
-    Hood.set_value(1);
+    chassis.moveToPoint(-25,48,2200,{.forwards=false,.maxSpeed=60}); //reverses into the goal while allowing the intake to run at the same time
+    chassis.waitUntil(8);//waits until 8 inches has passed
+    Hood.set_value(1); //Lifts Hood
     chassis.waitUntilDone();
-    Hood.set_value(0); 
-    Matchload.set_value(1);
-    chassis.moveToPoint(-63,48,2000,{.maxSpeed=60});
+    Hood.set_value(0); //Lowers Hood
+    Matchload.set_value(1);//Deploys Matchload
+    chassis.moveToPoint(-63,48,2000,{.maxSpeed=60}); //Goes into matchload while intaking
     chassis.waitUntilDone();
-    chassis.moveToPoint(-25,48,2000,{.forwards=false,.maxSpeed=60});
-    chassis.waitUntil(15);
-    Hood.set_value(1);
+    chassis.moveToPoint(-25,48,2000,{.forwards=false,.maxSpeed=60}); //backs into long goal again
+    chassis.waitUntil(15); //waits until 15 inches passed
+    Hood.set_value(1); // Lifts Hood
     chassis.waitUntilDone();
 
 } 
