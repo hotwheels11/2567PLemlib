@@ -1,4 +1,4 @@
-# 2567P Autonomous Code Repository
+# 2567P Repository
 
 Hi! I'm Logan, the main programmer for Team 2567P. This repository contains all of our autonomous programs for the season.  
 
