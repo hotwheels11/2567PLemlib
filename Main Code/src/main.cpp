@@ -14,10 +14,10 @@ void initialize() {
 }
 
 ts::auton GC("Get Cords", calculatePoseAuto);
-ts::auton WPLU("WP Auto Line Up", line_Up_Auto);
+ts::auton WPLU("WP Auto Line Up", line_Up_Solo);
 ts::auton WP("Solo WP Auto", WP_Auto);
-ts::auton LU("Line Up", right_Side);
-ts::auton RS("Right Side", left_Side);
+ts::auton LU("Line Up", line_Up_Auto);
+ts::auton RS("Right Side", right_Side);
 ts::auton LS("Left Side", left_Side);
 ts::auton SK("Skills", Skills_Auto);
 
@@ -55,9 +55,93 @@ void competition_initialize() {
  */
 
 void autonomous() {
-	ts::selector::get()->run_selected_auton();
+	//ts::selector::get()->run_selected_auton();
+	pros::delay(50);
+	Descore.set_value(1);
+	chassis.moveToPoint(0,14.5,800,{.maxSpeed=90,.earlyExitRange=1});
+	intake.move(127);
+	chassis.swingToHeading(-50,lemlib::DriveSide::LEFT,350,{.maxSpeed=83});
+	chassis.turnToHeading(-33,300);
+	chassis.waitUntilDone();
+	Matchload.set_value(1);
+	chassis.moveToPoint(-15,38,900);
+	chassis.waitUntil(10);
+	Matchload.set_value(0);
+	chassis.swingToHeading(-73,lemlib::DriveSide::LEFT,350,{.maxSpeed=83});
+	chassis.moveToPoint(-24,43,450);
+	chassis.waitUntil(4);
+	Matchload.set_value(1);
+	chassis.waitUntilDone();
+	chassis.moveToPoint(-.5,35,900,{.forwards=false,.maxSpeed=70});
+	intake.move(-127);
+	chassis.swingToHeading(-135,lemlib::DriveSide::RIGHT,450,{.direction=lemlib::AngularDirection::CCW_COUNTERCLOCKWISE});
+	intakeFront.move(127);
+	chassis.moveToPoint(10.5,44.5,1900,{.forwards=false,.maxSpeed=83});
+	intake.move(127);
+	intakelate.move(-100);
+	chassis.waitUntilDone();
+	intake.move(127);
+	chassis.moveToPoint(-32,4,1000,{.maxSpeed=83});
+	chassis.turnToHeading(-178,500);
+	chassis.moveToPoint(-28,-5,1300,{.maxSpeed=60});
+	chassis.moveToPoint(-32,4.7,500,{.forwards=false});
+	chassis.turnToHeading(-287,450);
+	Matchload.set_value(0);
+	chassis.moveToPoint(31,32,1500,{.maxSpeed=83});
+	chassis.turnToHeading(-400,450);
+	chassis.moveToPoint(35,36.5,2000);
+	chassis.waitUntil(5);
+	intake.move(-127);
+	chassis.waitUntilDone();
 }
 
+/*
+	//ts::selector::get()->run_selected_auton();
+	pros::delay(50);
+	Descore.set_value(1);
+	chassis.moveToPoint(0,14.5,750,{.maxSpeed=90,.earlyExitRange=1});
+	intake.move(127);
+	chassis.swingToHeading(-50,lemlib::DriveSide::LEFT,350,{.maxSpeed=80});
+	chassis.turnToHeading(-33,300);
+	chassis.waitUntilDone();
+	Matchload.set_value(1);
+	chassis.moveToPoint(-15,38,1000);
+	chassis.waitUntil(10);
+	Matchload.set_value(0);
+	chassis.swingToHeading(-73,lemlib::DriveSide::LEFT,350,{.maxSpeed=80});
+	chassis.moveToPoint(-24,43,450);
+	chassis.waitUntil(4);
+	Matchload.set_value(1);
+	chassis.waitUntilDone();
+	chassis.moveToPoint(-2.6,27.7,1000,{.forwards=false,.maxSpeed=70});
+	chassis.turnToHeading(-121,400);
+	chassis.moveToPoint(-27,15,800,{.maxSpeed=80});
+	chassis.turnToHeading(-180,400);
+	chassis.waitUntilDone();
+	Matchload.set_value(1);
+	chassis.moveToPoint(-31,-5,1400,{.maxSpeed=60});
+	chassis.waitUntilDone();
+	chassis.moveToPoint(-30,7,500,{.forwards=false,.maxSpeed=80});
+	chassis.waitUntilDone();
+	chassis.turnToHeading(-135,400);
+	chassis.moveToPoint(11, 46, 3000,{.forwards=false,.maxSpeed=80});
+	intake.move(-127);
+	pros::delay(500);
+	intake.move(127);
+	intakelate.move(-127);
+	chassis.waitUntilDone();
+	intake.move(127);
+	chassis.moveToPoint(0,34,800,{.maxSpeed=80});
+	chassis.turnToHeading(-266,400);
+	Matchload.set_value(0);
+	chassis.moveToPoint(37.6,31.5,1200,{.maxSpeed=80});
+	chassis.turnToHeading(-400,500);
+	//chassis.moveToPoint(37.6,37.5,2000);
+	//chassis.waitUntil(5);
+	//intake.move(-127);
+	//chassis.waitUntilDone();
+	//chassis.moveToPoint(44,30,1000,{.forwards=false,.maxSpeed=80});
+	//chassis.turnToHeading(0,400);*/
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -77,8 +161,6 @@ void autonomous() {
  int hoodmech=0;
 
 void opcontrol() {
-	pros::Task ParkTask(enableButtonTask); // Start the background timer when driver begins
-	pros::Task DistanceTask(activePosition);
 	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 	Descore.set_value(1);
 	while (true) {
@@ -141,31 +223,19 @@ void opcontrol() {
 		} else if (master.get_digital(DIGITAL_L1)) {
 		intake.move(127);
 		intakelate.move(-127);
+		} else if (master.get_digital(DIGITAL_A)){
+			intake.move(-70);
 		} else {
 		intake.move(0);
 		intakelate.move(0);
 		}
-
+		/*
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
-			if (buttonEnabled) {
-				intake.move(-127);  // Start intake
-
-				// Wait until inPosition becomes true
-				while (!inPosition) {
-					pros::delay(10);  // small delay to avoid hogging CPU
-				}
-
-				intake.move(0);       // Stop intake
-				park=1;
-				Park.set_value(1);
-				pros::delay(100);
-
-				inPosition = false;   // Reset for next use 
-			} else {
-				master.rumble(".."); // Not ready yet
-			}
+			intake.move(-70);
+		} else {
+			intake.move(0);
 		}
-
-	pros::delay(20);    
+			*/
 	}
+	pros::delay(20);    
 }
