@@ -55,7 +55,91 @@ void competition_initialize() {
  */
 
 void autonomous() {
-	chassis.moveToPoint(0,1,1000);
+	intake.move(127);
+	chassis.setPose(0,0,0);
+	chassis.moveToPoint(0,32.3,1000,{.maxSpeed=127}); //In front of first matchload
+	chassis.turnToHeading(86,1000);//turn to Marchload 1
+	Matchload.set_value(1);
+	chassis.moveToPoint(16,39.75,2600,{.maxSpeed=60}); //Goes into Matchload
+	pros::delay(500);
+	chassis.moveToPoint(0,40.5,850,{.forwards=false,.maxSpeed=127});//Pulls out of Matchload
+	chassis.waitUntilDone();
+	Matchload.set_value(0);
+	chassis.turnToHeading(-54,1000); //Turn To ally
+	chassis.moveToPoint(-12,49,1000,{.maxSpeed=127}); //Drive into the ally
+	chassis.turnToHeading(-90,1000,{}); //Turn down the ally
+	chassis.moveToPoint(-77,53,2000,{.maxSpeed=100}); //Drive down ally
+	chassis.turnToHeading(-135,1000); //Turn to second matchload
+	chassis.moveToPoint(-93,44.25,900,{.maxSpeed=127}); //Drive infront of matchload
+	chassis.turnToHeading(-88,1000); //Turns to Long Goal
+	chassis.moveToPoint(-60,40.5,3250,{.forwards=false,.maxSpeed=50}); //Drive into Long Goal
+	chassis.waitUntil(18);
+	intake.move(-127);
+	pros::delay(100);
+	intake.move(127);
+	Hood.set_value(1);
+	chassis.waitUntilDone();
+	Matchload.set_value(1);
+	chassis.moveToPoint(-125,40.5,3200,{.maxSpeed=50}); //Moves into Matchload 2
+	chassis.waitUntil(10);
+	Hood.set_value(0);
+	pros::delay(600);
+	chassis.moveToPoint(-67,40,3200,{.forwards=false,.maxSpeed=50}); //Scores in long 1 for second time
+	chassis.waitUntil(26);
+	intake.move(-127);
+	pros::delay(100);
+	intake.move(127);
+	Hood.set_value(1);
+	Matchload.set_value(0);
+	chassis.moveToPoint(-84,40.5,1000,{.maxSpeed=77}); //Moves out of Long Goal 1
+	chassis.waitUntil(5);
+	Hood.set_value(0);
+	chassis.turnToHeading(-178,1000); //Turns to other side of field
+	chassis.moveToPoint(-92,-53,2900,{.maxSpeed=100}); //Drives to in front of matchload 3
+	chassis.turnToHeading(-90,1000); //turns to matchload 3
+	Matchload.set_value(1);
+	chassis.moveToPoint(-115.5,-59.5,3450,{.maxSpeed=45}); //goes into matchload 3
+	pros::delay(100);
+	chassis.moveToPoint(-99,-60.5,900,{.forwards=false,.maxSpeed=77}); //pulls out of matchload 3
+	chassis.turnToHeading(-223,1000);//turns to ally
+	Matchload.set_value(0);
+	chassis.moveToPoint(-87,-68.87,900,{.maxSpeed=77}); //goes into ally
+	chassis.turnToHeading(-270,1000); //turns into ally
+	chassis.moveToPoint(-20,-76,2700,{.maxSpeed=77}); //drives through ally
+	chassis.turnToHeading(-300,900); //turns to matchload 4
+	chassis.moveToPoint(0,-66,1000,{.maxSpeed=77}); //Drive infront of matchload and long goal 2
+	chassis.turnToHeading(92,900); //turns to long goal 2
+	chassis.moveToPoint(-30.5,-62,3000,{.forwards=false,.maxSpeed=50}); //Reverses into Long goal 2
+	chassis.waitUntil(24);
+	intake.move(-127);
+	pros::delay(100);
+	intake.move(127);
+	Hood.set_value(1);
+	Matchload.set_value(1);
+	chassis.moveToPoint(12.5,-62.5,3100,{.maxSpeed=50}); //Moves into Matchload 4
+	chassis.waitUntil(10);
+	Hood.set_value(0);
+	chassis.moveToPoint(-30.5,-60.4,3500,{.forwards=false,.maxSpeed=50}); //backs out of matchload 4 into long goal 2
+	chassis.waitUntil(24);
+	intake.move(-127);
+	pros::delay(100);
+	intake.move(127);
+	Hood.set_value(1);
+	Matchload.set_value(0);
+	chassis.moveToPoint(-8,-63,900,{.maxSpeed=77}); //Moves out of Long Goal 2
+	chassis.turnToHeading(-324,900); //Turns to red zone
+	chassis.moveToPoint(9.3,-50.5,900,{.maxSpeed=77}); //Gets ready to turn to red
+	chassis.swingToHeading(1,lemlib::DriveSide::LEFT,1000,{}); //Swing to red zone
+	chassis.moveToPoint(16,-40, 1000,{.maxSpeed=77}); //Drives infront of red zone
+	chassis.waitUntilDone();
+	Matchload.set_value(1);
+	chassis.moveToPoint(16,-32, 500,{.maxSpeed=77});
+	chassis.moveToPoint(16,-19,3000,{.minSpeed=127}); //Drives into redzone and clears
+	chassis.waitUntil(7);
+	intake.move(-127);
+	pros::delay(200);
+	Matchload.set_value(0);
+	intake.move(127);
 }
 
 /**
@@ -85,10 +169,10 @@ void opcontrol() {
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
 
 		// Arcade control scheme
-		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+		int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
         // move the robot
-        chassis.tank(leftY, rightY);                  // Sets right motor voltage  
+		chassis.arcade(rightY, rightX);                 // Sets right motor voltage  
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)){
 		descore++;
 		if (descore % 2 == 1){

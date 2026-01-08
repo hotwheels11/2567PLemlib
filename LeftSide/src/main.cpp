@@ -166,19 +166,13 @@ void opcontrol() {
 		}
 		
 		if (master.get_digital(DIGITAL_R2)) {
-		intake.move(-127);
-		intakelate.move(-127);
+		intakeFront.move(-127);
 		} else if (master.get_digital(DIGITAL_R1)) {
-		intake.move(127);
-		intakelate.move(127);
+		intakeFront.move(127);
 		} else if (master.get_digital(DIGITAL_L2)) {
 		intake.move(-127);
-		intakelate.move(127);
 		} else if (master.get_digital(DIGITAL_L1)) {
 		intake.move(127);
-		intakelate.move(-127);
-		} else if (master.get_digital(DIGITAL_A)){
-			intake.move(-70);
 		} else {
 		intake.move(0);
 		intakelate.move(0);

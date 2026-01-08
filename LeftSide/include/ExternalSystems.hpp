@@ -6,17 +6,17 @@
 
 inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-inline pros::MotorGroup left_motors({-9, -2, -12}, pros::MotorGearset::blue); // left motors on ports -9, -2, -12
-inline pros::MotorGroup right_motors({7, 6 , 13}, pros::MotorGearset::blue); // right motors on ports 7, 6, 13
-inline pros::Imu imu(17);// imu on port 10
+inline pros::MotorGroup left_motors({3, -13, -11}, pros::MotorGearset::blue); // left motors on ports -9, -2, -12
+inline pros::MotorGroup right_motors({-7, 18 , 19}, pros::MotorGearset::blue); // right motors on ports 7, 6, 13
+inline pros::Imu imu(12);// imu on port 10
 
 inline pros::Rotation horizontal_encoder(16);
 inline pros::Rotation vertical_encoder(1);
 
-inline pros::Motor intakeFront(11);
+inline pros::Motor intakeFront(-9);
 inline pros::Motor intakemiddle(-18);
-inline pros::Motor intakelate(-20);
-inline pros::MotorGroup intake({11,-18,-20});
+inline pros::Motor intakelate(1);
+inline pros::MotorGroup intake({-9,-18,-1});
 //A,F,G,H
 inline pros::adi::DigitalOut Descore('A');
 inline pros::adi::DigitalOut Park('G');

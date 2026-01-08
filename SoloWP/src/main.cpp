@@ -55,59 +55,49 @@ void competition_initialize() {
  */
 
 void autonomous() {
-	chassis.setPose(-47,-16.3,90);
+	chassis.setPose(0,0,0);
 	intake.move(127);
-	chassis.moveToPoint(-33,-16.3,800);
+	chassis.moveToPoint(0,33,1000,{.maxSpeed=85});
+	chassis.turnToHeading(85,500);
 	chassis.waitUntilDone();
-	chassis.swingToHeading(133, lemlib::DriveSide::RIGHT, 200,{},false);
-	chassis.waitUntil(2.7);
-	intakemiddle.move(50);
 	Matchload.set_value(1);
-	chassis.moveToPoint(-16.5,-23,800);
+	chassis.moveToPoint(14,40.5,1250,{.maxSpeed=45}); //matchload mech 1
+	chassis.moveToPoint(-25,41.5,1850,{.forwards=false,.maxSpeed=60}); //goal 1
+	chassis.waitUntil(22);
+	Hood.set_value(1);
+	Matchload.set_value(0);
+	chassis.moveToPoint(-9,42,500,{.maxSpeed=85,.earlyExitRange=5}); //pulls out of long goal
+	chassis.waitUntil(2);
+	Hood.set_value(0);
 	chassis.waitUntilDone();
-	intakemiddle.move(0);
-	chassis.turnToHeading(47, 600);
+	chassis.turnToHeading(205,600); //turn to 1st 3 blocks
+	chassis.moveToPoint(-16,17.5,900,{.maxSpeed=85});
+	chassis.waitUntil(17);
+	Matchload.set_value(1);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(180,500);
 	chassis.waitUntilDone();
 	Matchload.set_value(0);
-	chassis.moveToPoint(-10,-17.4,1000,{});
-	chassis.waitUntil(3);
-	intake.move(-127);
-	intakeFront.move(-100);
-	pros::delay(860);
-	intake.move(127);
-	chassis.moveToPoint(-17, -27.6, 800,{.forwards=false});
-	chassis.waitUntilDone();
-	chassis.turnToHeading(0, 400);
-	chassis.waitUntilDone();
-	chassis.moveToPoint(-15, 16, 1200,{.maxSpeed=100});
+	chassis.moveToPoint(-20.5,-30,2000,{.maxSpeed=83}); //second 3 stack
 	chassis.waitUntil(35);
 	Matchload.set_value(1);
-	chassis.waitUntilDone();
-	chassis.turnToHeading(-45, 400);
-	chassis.waitUntilDone();
-	chassis.moveToPoint(-2, 5,800,{.forwards=false});
-	chassis.waitUntilDone();
+	chassis.turnToHeading(133.5,500);
+	chassis.moveToPoint(-35,-21,1000,{.forwards=false,.maxSpeed=85});
 	intake.move(-127);
-	pros::delay(200);
+	pros::delay(450);
 	intake.move(127);
-	intakelate.move(-127);
-	pros::delay(680);
-	intakelate.move(127);
-	Matchload.set_value(0);
-	chassis.turnToHeading(-38, 700,{},false);
-	chassis.moveToPoint(-38, 45, 1150,{.maxSpeed=80});
-	chassis.waitUntilDone();
-	chassis.turnToHeading(-90, 600);
-	chassis.waitUntilDone();
-	Matchload.set_value(1);
-	pros::delay(100);
-	chassis.moveToPoint(-70, 47, 1300,{.maxSpeed=60});
-	chassis.moveToPoint(-15, 47, 3000,{.forwards=false,.maxSpeed=60});
-	chassis.waitUntil(7);
+	intakelate.move(-110);
+	pros::delay(1000);
 	intake.move(0);
-	pros::delay(500);
-	Hood.set_value(1);
+	chassis.waitUntilDone();
+	chassis.moveToPoint(4.5,-56,1300,{.maxSpeed=85}); //goes infront matchload area
+	chassis.turnToHeading(90,600);
+	chassis.moveToPoint(16.5,-58.8,2000,{.maxSpeed=60}); //into matchload area
 	intake.move(127);
+	chassis.waitUntilDone();
+	chassis.moveToPoint(-20,-60.8,2000,{.forwards=false,.maxSpeed=75}); //backs out of matchload area
+	chassis.waitUntil(20);
+	Hood.set_value(1);
 }
 
 /**
@@ -130,7 +120,6 @@ void autonomous() {
 
 void opcontrol() {
 	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-	Descore.set_value(1);
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
@@ -140,7 +129,7 @@ void opcontrol() {
 		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
         // move the robot
-        chassis.tank(leftY, rightY);                  // Sets right motor voltage  
+        chassis.tank(leftY, rightY);   
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)){
 		descore++;
 		if (descore % 2 == 1){

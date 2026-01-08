@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Left SIde",
+    "project_name": "T",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -655,7 +655,7 @@
       "after": "run",
       "description": "This Code contains all autos we require.",
       "icon": "clawbot",
-      "slot": 3
+      "slot": 1
     },
     "use_early_access": false
   }
