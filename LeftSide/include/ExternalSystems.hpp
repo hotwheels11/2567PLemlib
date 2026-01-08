@@ -14,14 +14,11 @@ inline pros::Rotation horizontal_encoder(16);
 inline pros::Rotation vertical_encoder(1);
 
 inline pros::Motor intakeFront(11);
-inline pros::Motor intakemiddle(-18);
-inline pros::Motor intakelate(-20);
-inline pros::MotorGroup intake({11,-18,-20});
+inline pros::Motor intakeTop(-20);
+inline pros::MotorGroup intake({11,-20});
 //A,F,G,H
 inline pros::adi::DigitalOut Descore('A');
-inline pros::adi::DigitalOut Park('G');
 inline pros::adi::DigitalOut Matchload('H');
-inline pros::adi::DigitalOut Hood('F');
 
 inline pros::Distance ParkSensor(4);
 inline pros::Distance front_sensor(10);

@@ -8,19 +8,9 @@
 
 void initialize() {
     //pros::lcd::initialize();
-	ts::selector::get()->display();
 	chassis.calibrate();// make sure chassis is ready
     pros::Task coordDisplayTask(Coords);
 }
-
-ts::auton GC("Get Cords", calculatePoseAuto);
-ts::auton WPLU("WP Auto Line Up", line_Up_Solo);
-ts::auton WP("Solo WP Auto", WP_Auto);
-ts::auton LU("Line Up", line_Up_Auto);
-ts::auton RS("Right Side", right_Side);
-ts::auton LS("Left Side", left_Side);
-ts::auton SK("Skills", Skills_Auto);
-
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -57,43 +47,6 @@ void competition_initialize() {
 void autonomous() {
 	chassis.setPose(0, 0, 0);
 	Descore.set_value(1);
-    chassis.moveToPoint(0, 13, 700);
-    intake.move(127);
-    chassis.moveToPoint(-9.0, 28, 700);//get first three balls
-    chassis.waitUntil(3.5);
-    Matchload.set_value(1); //Activates to hold balls in place
-    chassis.waitUntilDone();
-    Matchload.set_value(0); //Deactivates
-    pros::delay(400);
-	chassis.turnToHeading(-41, 800);
-    chassis.moveToPoint(-24, 44, 1550);
-    pros::delay(450);
-    Matchload.set_value(1); //Activates to hold balls in place
-    chassis.moveToPoint(-7,26,1000,{.forwards=false,.maxSpeed=50}); //moves back to three ball area
-    chassis.turnToHeading(-133, 1000); //turn to middle goal
-    Matchload.set_value(0); //Deactivates
-    chassis.moveToPoint(9, 44, 800,{.forwards=false}); //drives into middle goal
-	intake.move(-127);
-	intakeFront.move(0);
-	pros::delay(300);
-    intake.move(127); //outtakes balls into middle goal
-	intakelate.move(-70);
-    pros::delay(1000);
-	intakelate.move(127);
-    chassis.moveToPoint(-30.1, 9, 1300,{.maxSpeed=90}); //backs away from middle goal
-    chassis.turnToHeading(-180,1000,{.maxSpeed=90});
-    Matchload.set_value(1); //Activates
-    chassis.moveToPoint(-32,-15,1300,{.maxSpeed=50}); //Drives into Matchload Area
-    chassis.waitUntilDone();
-    intakeFront.move(127);
-    chassis.moveToPoint(-32.5, 38, 3000,{.forwards=false,.maxSpeed=60}); //backs out of matchload area
-	chassis.waitUntil(20);
-	Hood.set_value(1);
-    Matchload.set_value(0); //Deactivates
-    intake.move(-127);
-    pros::delay(300);
-    intake.move(127);
-    chassis.waitUntilDone();
 }
 
 /**
@@ -110,9 +63,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
  int descore = 0;
- int park = 0;
  int MatchloadMech = 0;
- int hoodmech=0;
 
 void opcontrol() {
 	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
@@ -137,24 +88,6 @@ void opcontrol() {
 		if (descore % 2 == 0){
 		Descore.set_value(0);
 		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
-		hoodmech++;
-		if (hoodmech % 2 == 0){
-			Hood.set_value(0);
-		}
-		}
-		if (hoodmech % 2 == 1){
-		Hood.set_value(1);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)){
-		park++;
-		if (park % 2 == 1){
-			Park.set_value(1);
-		} 
-		}
-		if (park % 2 == 0){
-		Park.set_value(0);
-		}
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)){
 		MatchloadMech++;
 		if (MatchloadMech % 2 == 0){
@@ -166,30 +99,21 @@ void opcontrol() {
 		}
 		
 		if (master.get_digital(DIGITAL_R2)) {
-		intake.move(-127);
-		intakelate.move(-127);
+			intakeTop.move(-127);
 		} else if (master.get_digital(DIGITAL_R1)) {
-		intake.move(127);
-		intakelate.move(127);
+			intake.move(127);
+			intakeTop.move(127);
 		} else if (master.get_digital(DIGITAL_L2)) {
-		intake.move(-127);
-		intakelate.move(127);
+			intake.move(-127);
+			intakeTop.move(127);
 		} else if (master.get_digital(DIGITAL_L1)) {
-		intake.move(127);
-		intakelate.move(-127);
+			intake.move(127);
+			intakeTop.move(-127);
 		} else if (master.get_digital(DIGITAL_A)){
-			intake.move(-70);
-		} else {
-		intake.move(0);
-		intakelate.move(0);
-		}
-		/*
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
 			intake.move(-70);
 		} else {
 			intake.move(0);
 		}
-			*/
 	}
 	pros::delay(20);    
 }
