@@ -22,6 +22,7 @@ inline pros::MotorGroup intake({-9,-1});
 inline pros::adi::DigitalOut Descore('B');
 inline pros::adi::DigitalOut Matchload('A');
 inline pros::adi::DigitalOut middleGoal('C');
+inline pros::adi::DigitalOut middleGoalDescore('D');
 
 inline pros::Distance ParkSensor(4);
 inline pros::Distance front_sensor(10);

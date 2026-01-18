@@ -82,16 +82,15 @@ void autonomous() {
     Descore.set_value(1);
     intakeFront.move(127);
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0,14,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
+    chassis.moveToPoint(0,14.5,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
     chassis.swingToHeading(-34,lemlib::DriveSide::LEFT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=2}); //Swings into 3 stack
-    chassis.moveToPoint(-19,36.5,800,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives to center of field
-    chassis.moveToPoint(-19.75,10,1200,{.forwards=false,.maxSpeed=127});
+    chassis.moveToPoint(-21,36.5,800,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives to center of field
+    chassis.moveToPoint(-21.75,10,1200,{.forwards=false,.maxSpeed=127});
     //chassis.swingToHeading(170,lemlib::DriveSide::LEFT,1200,{.direction=lemlib::AngularDirection::CW_CLOCKWISE,.maxSpeed=127,.minSpeed=50,.earlyExitRange=3}); //Swings to goal
-    intake.move(0);
     chassis.turnToHeading(88,500);
-    chassis.moveToPoint(-30,4.2,800,{.forwards=false});
-    chassis.turnToHeading(178,800);
-    chassis.moveToPoint(-36,15,800,{.forwards=false,.minSpeed=40});
+    chassis.moveToPoint(-32,4.2,600,{.forwards=false});
+    chassis.turnToHeading(178,600);
+    chassis.moveToPoint(-39,15,600,{.forwards=false,.minSpeed=40});
     intake.move(-127);
     Matchload.set_value(1);
     intake.move(0);
@@ -99,24 +98,24 @@ void autonomous() {
     intake.move(127);
     pros::delay(1300);
     intake.move(0);
-    chassis.moveToPoint(-33,-30,1650,{.maxSpeed=50}); //Goes into matchload
+    chassis.moveToPoint(-36,-30,1650,{.maxSpeed=55}); //Goes into matchload
     intakeFront.move(127);
-    chassis.moveToPoint(-33,-5,500,{.forwards=false,.minSpeed=40,.earlyExitRange=3});
+    chassis.moveToPoint(-36,-2,500,{.forwards=false,.minSpeed=40,.earlyExitRange=3});
     chassis.swingToHeading(222,lemlib::DriveSide::LEFT,800,{.direction=lemlib::AngularDirection::CW_CLOCKWISE,.maxSpeed=127,.minSpeed=50,.earlyExitRange=3}); //Swings to goal
-    chassis.moveToPoint(-6,26,1000,{.forwards=false});
+    chassis.moveToPoint(-3,33,1060,{.forwards=false});
     intake.move(-127);
-    pros::delay(200);
+    pros::delay(210);
     intake.move(0);
-    chassis.waitUntil(25);
+    chassis.waitUntil(27);
     middleGoal.set_value(1);
-    pros::delay(30);
-    intakeFront.move(127);
+    pros::delay(45);
+    intakeFront.move(100);
     chassis.waitUntilDone();
     pros::delay(1000);
-    chassis.moveToPoint(-29.5,-5.9,1300);
+    chassis.moveToPoint(-28.67,-5.9,1300);
     chassis.turnToHeading(178,1000);
     Descore.set_value(0);
-    chassis.moveToPoint(-26,25,5000,{.forwards=false,.maxSpeed=80});
+    chassis.moveToPoint(-27.75,31,1200,{.forwards=false,.maxSpeed=60});
 }
 
 /**
@@ -135,6 +134,7 @@ void autonomous() {
 bool middleGoalState = false;
 
 bool middleGoalManual = false;
+inline int middleGoalDescoreState = 0;
 
 void opcontrol() {
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
@@ -153,6 +153,10 @@ void opcontrol() {
         }
         Descore.set_value(descore % 2 == 1);
 
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+            middleGoalDescoreState++;
+        }
+        middleGoalDescore.set_value(middleGoalDescoreState % 2 == 1);
         // ===== MATCHLOAD TOGGLE (Y) =====
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
             MatchloadMech++;
@@ -160,7 +164,7 @@ void opcontrol() {
         Matchload.set_value(MatchloadMech % 2 == 0);
 
         // ===== MIDDLE GOAL MANUAL TOGGLE (DOWN) =====
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
             middleGoalManual = !middleGoalManual;
         }
 
@@ -181,7 +185,7 @@ void opcontrol() {
             intake.move(127);
         }
         else if (master.get_digital(DIGITAL_L2)) {
-            intakeFront.move(127);
+            intakeFront.move(100);
         }
         else {
             intake.move(0);

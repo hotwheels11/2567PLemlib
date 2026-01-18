@@ -87,8 +87,8 @@ void autonomous() {
     chassis.turnToHeading(-88,400,{.minSpeed=20,.earlyExitRange=1}); //Turns to face Matchload
     Matchload.set_value(1);
     chassis.moveToPoint(-24,-54,1000,{.maxSpeed=80}); //Matchload 1
-    chassis.moveToPoint(22,-55,1600,{.forwards=false,.maxSpeed=90}); // Scores in Goal 1
-    chassis.waitUntil(28);
+    chassis.moveToPoint(22,-55,1700,{.forwards=false,.maxSpeed=90}); // Scores in Goal 1
+    chassis.waitUntil(30);
     intakeTop.move(127);
     chassis.waitUntilDone();
     intakeTop.move(0);
@@ -109,28 +109,32 @@ void autonomous() {
     chassis.waitUntil(28);
     Matchload.set_value(1);
     chassis.turnToHeading(-45,500,{.minSpeed=20,.earlyExitRange=3}); //Turns to middle goal
-    chassis.moveToPoint(34.35,12.25,1000,{.forwards=false,.maxSpeed=100,.minSpeed=1,.earlyExitRange=1}); //Backs and scores
+    chassis.moveToPoint(36.5,11,1000,{.forwards=false,.maxSpeed=100,.minSpeed=1,.earlyExitRange=1}); //Backs and scores
     intake.move(-127);
     pros::delay(150);
     intake.move(0);
     chassis.waitUntilDone();
     middleGoal.set_value(1);
-    intakeFront.move(127);
+    intakeFront.move(100);
     pros::delay(1200);
     intakeFront.move(0);
     middleGoal.set_value(0);
-    chassis.moveToPoint(-7,49.5,1500,{.maxSpeed=110,.minSpeed=20,.earlyExitRange=2}); //Drives to matchload 2
+    chassis.moveToPoint(-7,48,1500,{.maxSpeed=110,.minSpeed=20,.earlyExitRange=2}); //Drives to matchload 2
     intake.move(-127);
     pros::delay(100);
     intakeTop.move(0);
     intakeFront.move(127);
     chassis.swingToHeading(-90,lemlib::DriveSide::LEFT,400,{.minSpeed=20,.earlyExitRange=3}); //Swings to matchload 2
-    chassis.moveToPoint(-22,47,900,{.maxSpeed=80}); //Collects Matchload 2
-    chassis.moveToPoint(25,47,1900,{.forwards=false,.maxSpeed=80}); // Scores in Goal 2
+    chassis.moveToPoint(-22,44,900,{.maxSpeed=80}); //Collects Matchload 2
+    chassis.moveToPoint(25,44,1900,{.forwards=false,.maxSpeed=80}); // Scores in Goal 2
+    intake.move(-127);
+    pros::delay(150);
+    intake.move(0);
     chassis.waitUntil(28);
-    intakeTop.move(127);
+    intake.move(127);
+    chassis.waitUntilDone();
     Matchload.set_value(0);
-    chassis.moveToPoint(20,47,1000);
+    chassis.moveToPoint(20,44,1000);
 }
 
 /**
@@ -149,7 +153,7 @@ void autonomous() {
 bool middleGoalState = false;
 
 bool middleGoalManual = false;
-
+inline int middleGoalDescoreState = 0;
 void opcontrol() {
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
     Descore.set_value(1);
@@ -167,6 +171,10 @@ void opcontrol() {
         }
         Descore.set_value(descore % 2 == 1);
 
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+            middleGoalDescoreState++;
+        }
+        middleGoalDescore.set_value(middleGoalDescoreState % 2 == 1);
         // ===== MATCHLOAD TOGGLE (Y) =====
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
             MatchloadMech++;
@@ -174,7 +182,7 @@ void opcontrol() {
         Matchload.set_value(MatchloadMech % 2 == 0);
 
         // ===== MIDDLE GOAL MANUAL TOGGLE (DOWN) =====
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
             middleGoalManual = !middleGoalManual;
         }
 
@@ -195,7 +203,7 @@ void opcontrol() {
             intake.move(127);
         }
         else if (master.get_digital(DIGITAL_L2)) {
-            intakeFront.move(127);
+            intakeFront.move(100);
         }
         else {
             intake.move(0);
