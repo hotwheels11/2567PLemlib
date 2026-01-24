@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Right 4 Ball",
+    "project_name": "Right 4",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -653,9 +653,9 @@
     },
     "upload_options": {
       "after": "run",
-      "description": "This Code contains all autos we require.",
-      "icon": "clawbot",
-      "slot": 3
+      "description": "",
+      "icon": "X",
+      "slot": 1
     },
     "use_early_access": false
   }

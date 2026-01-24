@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "LeftElmim",
+    "project_name": "Left 4-3",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -654,8 +654,8 @@
     "upload_options": {
       "after": "run",
       "description": "This Code contains all autos we require.",
-      "icon": "clawbot",
-      "slot": 2
+      "icon": "X",
+      "slot": 4
     },
     "use_early_access": false
   }

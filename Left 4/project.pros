@@ -655,7 +655,7 @@
       "after": "run",
       "description": "This Code contains all autos we require.",
       "icon": "X",
-      "slot": 4
+      "slot": 3
     },
     "use_early_access": false
   }

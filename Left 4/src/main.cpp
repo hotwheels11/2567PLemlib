@@ -82,29 +82,32 @@ void autonomous() {
     Descore.set_value(1);
     intakeFront.move(127);
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0,14.5,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
-    chassis.swingToHeading(-34,lemlib::DriveSide::LEFT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=2}); //Swings into 3 stack
+    chassis.moveToPoint(0,14.8,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
+    chassis.swingToHeading(-33,lemlib::DriveSide::LEFT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=2}); //Swings into 3 stack
     chassis.moveToPoint(-21,36.5,800,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives to center of field
-    chassis.moveToPoint(-21.75,10,1200,{.forwards=false,.maxSpeed=127});
-    //chassis.swingToHeading(170,lemlib::DriveSide::LEFT,1200,{.direction=lemlib::AngularDirection::CW_CLOCKWISE,.maxSpeed=127,.minSpeed=50,.earlyExitRange=3}); //Swings to goal
-    chassis.turnToHeading(88,500);
-    chassis.moveToPoint(-32,4.2,550,{.forwards=false});
-    chassis.turnToHeading(178,600);
-    chassis.moveToPoint(-39,15,600,{.forwards=false,.minSpeed=40});
-    intake.move(-127);
+    chassis.waitUntil(4.5);
     Matchload.set_value(1);
-    intake.move(0);
-    chassis.waitUntilDone();
+    chassis.moveToPoint(-21.75,10,1200,{.forwards=false,.maxSpeed=127});
+    Matchload.set_value(0);
+    chassis.turnToHeading(88,400);
+    chassis.moveToPoint(-32,4.2,550,{.forwards=false});
+    chassis.turnToHeading(178,450);
+    chassis.moveToPoint(-39,15,1600,{.forwards=false,.maxSpeed=75,.minSpeed=40});
+    intake.move(-127);
+    pros::delay(100);
     intake.move(127);
-    pros::delay(1300);
+    chassis.waitUntilDone();
     intake.move(0);
-    chassis.moveToPoint(-39,10,1600,{.maxSpeed=65}); //Goes into matchload
-    chassis.moveToPoint(-28.67,-5.9,1300);
-    chassis.turnToHeading(178,1000);
+    chassis.moveToPoint(-39,0,1600,{.maxSpeed=65});
+    chassis.turnToHeading(-90, 500);
+    chassis.moveToPoint(-30.5,8,1300,{.forwards=false});
+    chassis.turnToHeading(178,500);
+    chassis.waitUntilDone();
     Descore.set_value(0);
-    chassis.moveToPoint(-25.5,35,1200,{.forwards=false,.maxSpeed=60});
-    chassis.swingToHeading(190,lemlib::DriveSide::RIGHT,800,{.minSpeed=100});
-
+    chassis.moveToPoint(-28.25,31,1200,{.forwards=false,.maxSpeed=60});
+    Matchload.set_value(1);
+    chassis.swingToHeading(190,lemlib::DriveSide::RIGHT,500,{.minSpeed=100});
+    MatchloadMech++;
 }
 
 /**

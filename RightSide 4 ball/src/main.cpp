@@ -86,26 +86,25 @@ void autonomous() {
     chassis.swingToHeading(30,lemlib::DriveSide::RIGHT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=2}); //Swings into 3 stack
     chassis.moveToPoint(21,37,800,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives to center of field
     chassis.moveToPoint(21.75,10,1200,{.forwards=false,.maxSpeed=127});
-    chassis.turnToHeading(-88,500);
-    chassis.moveToPoint(30,5,600,{.forwards=false});
-    chassis.turnToHeading(-178,600);
-    chassis.moveToPoint(36,16,600,{.forwards=false,.minSpeed=40});
+    chassis.turnToHeading(-88,400);
+    chassis.moveToPoint(30,5,550,{.forwards=false});
+    chassis.turnToHeading(-178,450);
+    chassis.moveToPoint(37.25,16,550,{.forwards=false,.maxSpeed=85,.minSpeed=40});
     intake.move(-127);
     intake.move(0);
     chassis.waitUntilDone();
     intake.move(127);
     pros::delay(1350);
     intake.move(0);
-    chassis.moveToPoint(35, 0, 1000);
-    chassis.turnToHeading(-90, 1000);
-    chassis.waitUntilDone();
-    chassis.moveToPoint(45,10,1000,{.forwards=false});
-    chassis.turnToHeading(-178, 800);
+    chassis.moveToPoint(35, 0, 800);
+    chassis.turnToHeading(-90, 500);
+    chassis.moveToPoint(43,7,800,{.forwards=false});
+    chassis.turnToHeading(-175, 500);
     chassis.waitUntilDone();
     Descore.set_value(0);
-    chassis.moveToPoint(47.5,33.5,1100,{.forwards=false,.maxSpeed=60});
+    chassis.moveToPoint(48,33.5,1100,{.forwards=false,.maxSpeed=60});
     Matchload.set_value(1);
-    chassis.swingToHeading(190,lemlib::DriveSide::RIGHT,800,{.minSpeed=100});
+    chassis.swingToHeading(192,lemlib::DriveSide::RIGHT,800,{.minSpeed=100});
     MatchloadMech = 0;
 }
 
@@ -176,7 +175,7 @@ void opcontrol() {
             intake.move(127);
         }
         else if (master.get_digital(DIGITAL_L2)) {
-            intakeFront.move(1);
+            intakeFront.move(127);
         }
         else {
             intake.move(0);

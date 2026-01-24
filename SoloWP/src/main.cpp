@@ -86,8 +86,8 @@ void autonomous() {
     chassis.moveToPoint(0,-47,1900,{.forwards=false,.maxSpeed=100}); //Reverses to Matchload
     chassis.turnToHeading(-88,400,{.minSpeed=20,.earlyExitRange=1}); //Turns to face Matchload
     Matchload.set_value(1);
-    chassis.moveToPoint(-24,-54,1000,{.maxSpeed=80}); //Matchload 1
-    chassis.moveToPoint(22,-55,1700,{.forwards=false,.maxSpeed=90}); // Scores in Goal 1
+    chassis.moveToPoint(-24,-54,980,{.maxSpeed=80}); //Matchload 1
+    chassis.moveToPoint(21,-55,1880,{.forwards=false,.maxSpeed=80}); // Scores in Goal 1
     chassis.waitUntil(30);
     intakeTop.move(127);
     chassis.waitUntilDone();
@@ -109,13 +109,13 @@ void autonomous() {
     chassis.waitUntil(28);
     Matchload.set_value(1);
     chassis.turnToHeading(-45,500,{.minSpeed=20,.earlyExitRange=3}); //Turns to middle goal
-    chassis.moveToPoint(36.5,11,1000,{.forwards=false,.maxSpeed=100,.minSpeed=1,.earlyExitRange=1}); //Backs and scores
+    chassis.moveToPoint(36.25,9.5,1000,{.forwards=false,.maxSpeed=100,.minSpeed=1,.earlyExitRange=1}); //Backs and scores
     intake.move(-127);
-    pros::delay(150);
+    pros::delay(250);
     intake.move(0);
-    chassis.waitUntilDone();
     middleGoal.set_value(1);
-    intakeFront.move(100);
+    chassis.waitUntilDone();
+    intakeFront.move(110);
     pros::delay(1200);
     intakeFront.move(0);
     middleGoal.set_value(0);
@@ -125,16 +125,10 @@ void autonomous() {
     intakeTop.move(0);
     intakeFront.move(127);
     chassis.swingToHeading(-90,lemlib::DriveSide::LEFT,400,{.minSpeed=20,.earlyExitRange=3}); //Swings to matchload 2
-    chassis.moveToPoint(-22,44,900,{.maxSpeed=80}); //Collects Matchload 2
-    chassis.moveToPoint(25,44,1900,{.forwards=false,.maxSpeed=80}); // Scores in Goal 2
-    intake.move(-127);
-    pros::delay(150);
-    intake.move(0);
-    chassis.waitUntil(28);
-    intake.move(127);
+    chassis.moveToPoint(-22.75,44,900,{.maxSpeed=80}); //Collects Matchload 2
+    chassis.moveToPoint(24.95,45.25,1000,{.forwards=false,.maxSpeed=75}); // Scores in Goal 2
     chassis.waitUntilDone();
-    Matchload.set_value(0);
-    chassis.moveToPoint(20,44,1000);
+    intake.move(127);
 }
 
 /**
@@ -203,7 +197,7 @@ void opcontrol() {
             intake.move(127);
         }
         else if (master.get_digital(DIGITAL_L2)) {
-            intakeFront.move(100);
+            intakeFront.move(127);
         }
         else {
             intake.move(0);
