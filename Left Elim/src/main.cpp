@@ -97,7 +97,7 @@ void autonomous() {
     intake.move(127);
     pros::delay(1300);
     intake.move(0);
-    chassis.moveToPoint(-36,-31,1680,{.maxSpeed=50}); //Goes into matchload
+    chassis.moveToPoint(-36,-31,1680,{.maxSpeed=45}); //Goes into matchload
     intakeFront.move(127);
     chassis.moveToPoint(-36,-2,500,{.forwards=false,.minSpeed=40,.earlyExitRange=3}); //Backs out of matchload 
     chassis.swingToHeading(222,lemlib::DriveSide::LEFT,800,{.direction=lemlib::AngularDirection::CW_CLOCKWISE,.maxSpeed=127,.minSpeed=50,.earlyExitRange=3}); //Swingsto the angle of middle goal

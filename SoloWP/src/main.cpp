@@ -119,13 +119,13 @@ void autonomous() {
     pros::delay(1200);
     intakeFront.move(0);
     middleGoal.set_value(0);
-    chassis.moveToPoint(-7,48,1500,{.maxSpeed=110,.minSpeed=20,.earlyExitRange=2}); //Drives to matchload 2
+    chassis.moveToPoint(-7,47.5,1500,{.maxSpeed=110,.minSpeed=20,.earlyExitRange=2}); //Drives to matchload 2
     intake.move(-127);
     pros::delay(100);
     intakeTop.move(0);
     intakeFront.move(127);
     chassis.swingToHeading(-90,lemlib::DriveSide::LEFT,400,{.minSpeed=20,.earlyExitRange=3}); //Swings to matchload 2
-    chassis.moveToPoint(-22.75,44,900,{.maxSpeed=80}); //Collects Matchload 2
+    chassis.moveToPoint(-22.75,43.5,900,{.maxSpeed=80}); //Collects Matchload 2
     chassis.moveToPoint(24.95,45.25,1000,{.forwards=false,.maxSpeed=75}); // Scores in Goal 2
     chassis.waitUntilDone();
     intake.move(127);
