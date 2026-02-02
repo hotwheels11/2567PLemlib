@@ -84,6 +84,7 @@ void autonomous() {
     chassis.setPose(0, 0, 0);
     chassis.moveToPoint(0,16,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
     chassis.swingToHeading(30,lemlib::DriveSide::RIGHT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=2}); //Swings into 3 stack
+    Matchload.set_value(1);
     chassis.moveToPoint(21,37,800,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives to center of field
     chassis.moveToPoint(21.75,10,1050,{.forwards=false,.maxSpeed=127});
     chassis.turnToHeading(-90,400);

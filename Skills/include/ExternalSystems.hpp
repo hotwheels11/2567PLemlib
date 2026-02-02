@@ -8,37 +8,36 @@
 
 inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-inline pros::MotorGroup left_motors({-3, -13, -11}, pros::MotorGearset::blue); // left motors on ports 3, -13, -11
-inline pros::MotorGroup right_motors({7, 18 , 19}, pros::MotorGearset::blue); // right motors on ports -7, 18, 19
-inline pros::Imu imu(12); // imu on port 12
-inline pros::Motor LeftTest(-11);
-inline pros::Rotation horizontal_encoder(-20);
-inline pros::Rotation vertical_encoder(-2);
+inline pros::MotorGroup left_motors({-8, -19, -20}, pros::MotorGearset::blue); // left motors on ports 3, -13, -11
+inline pros::MotorGroup right_motors({18, 4 ,1}, pros::MotorGearset::blue); // right motors on ports -7, 18, 19
+inline pros::Imu imu(14); // imu on port 14
+inline pros::Rotation horizontal_encoder(-2);
+inline pros::Rotation vertical_encoder(-11);
 
-inline pros::Motor intakeFront(-9);
-inline pros::Motor intakeTop(-1);
-inline pros::MotorGroup intake({-9,-1});
+inline pros::Motor intakeFront(-12);
+inline pros::Motor intakeTop(-13);
+inline pros::MotorGroup intake({-12,-13});
 
-inline pros::adi::DigitalOut Descore('B');
-inline pros::adi::DigitalOut Matchload('A');
-inline pros::adi::DigitalOut middleGoal('C');
-inline pros::adi::DigitalOut middleGoalDescore('D');
+inline pros::adi::DigitalOut Descore('H');
+inline pros::adi::DigitalOut Matchload('F');
+inline pros::adi::DigitalOut middleGoal('G');
+inline pros::adi::DigitalOut middleGoalDescore('E');
 
-inline pros::Distance left_sensor(4);
-inline pros::Distance back_left_sensor(14);
-inline pros::Distance back_right_sensor(17);
+inline pros::Optical color_sensor(3);
 
-inline pros::Optical color_sensor(8);
+//Distance sensors
+inline pros::Distance left_sensor(17);
+inline pros::Distance back_left_sensor(9);
+inline pros::Distance back_right_sensor(21);
 
 //public Values
 inline int defaultState = 0;
 inline int descore = 0;
 inline int MatchloadMech = 1;
 
+inline lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, 5);
 
-inline lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_2, -2.5);
-// vertical tracking wheel
-inline lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_2, 0);
+inline lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_2, 2.2);
 
 // drivetrain settings
 inline lemlib::Drivetrain drivetrain(&left_motors, // left motor group
@@ -68,8 +67,8 @@ inline lemlib::ControllerSettings lateral_controller(5, // proportional gain (kP
                                               20 // maximum acceleration (slew) 20
 );
 inline lemlib::ControllerSettings angular_controller(2, // proportional gain (kP)
-                                              0.2, // integral gain (kI)
-                                              12, // derivative gain (kD)
+                                              0, // integral gain (kI)
+                                              15.5, // derivative gain (kD)
                                               4.65, // anti windup
                                               2, // small error range, in inches
                                               200, // small error range timeout, in milliseconds

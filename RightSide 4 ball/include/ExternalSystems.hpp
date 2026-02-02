@@ -2,34 +2,27 @@
 #include "lemlib/chassis/trackingWheel.hpp"
 #include "main.h"
 #include "pros/adi.hpp"
-#include "pros/distance.hpp"
 #include "pros/optical.hpp"
 #include "pros/rtos.hpp"
 
 inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-inline pros::MotorGroup left_motors({-3, -13, -11}, pros::MotorGearset::blue); // left motors on ports 3, -13, -11
-inline pros::MotorGroup right_motors({7, 18 , 19}, pros::MotorGearset::blue); // right motors on ports -7, 18, 19
-inline pros::Imu imu(12); // imu on port 12
-inline pros::Motor LeftTest(-11);
-inline pros::Rotation horizontal_encoder(-20);
-inline pros::Rotation vertical_encoder(-2);
+inline pros::MotorGroup left_motors({-8, -19, -20}, pros::MotorGearset::blue); // left motors on ports 3, -13, -11
+inline pros::MotorGroup right_motors({18, 4 ,1}, pros::MotorGearset::blue); // right motors on ports -7, 18, 19
+inline pros::Imu imu(14); // imu on port 14
+inline pros::Rotation horizontal_encoder(-2);
+inline pros::Rotation vertical_encoder(-11);
 
-inline pros::Motor intakeFront(-9);
-inline pros::Motor intakeTop(-1);
-inline pros::MotorGroup intake({-9,-1});
+inline pros::Motor intakeFront(-12);
+inline pros::Motor intakeTop(-13);
+inline pros::MotorGroup intake({-12,-13});
 
-inline pros::adi::DigitalOut Descore('B');
-inline pros::adi::DigitalOut Matchload('A');
-inline pros::adi::DigitalOut middleGoal('C');
-inline pros::adi::DigitalOut middleGoalDescore('D');
+inline pros::adi::DigitalOut Descore('H');
+inline pros::adi::DigitalOut Matchload('F');
+inline pros::adi::DigitalOut middleGoal('G');
+inline pros::adi::DigitalOut middleGoalDescore('E');
 
-inline pros::Distance ParkSensor(4);
-inline pros::Distance front_sensor(10);
-inline pros::Distance right_sensor(19);
-inline pros::Distance back_sensor(14);
-
-inline pros::Optical color_sensor(8);
+inline pros::Optical color_sensor(3);
 
 //public Values
 inline int defaultState = 0;
@@ -47,7 +40,7 @@ inline lemlib::Drivetrain drivetrain(&left_motors, // left motor group
                               10.7, // 10 inch track width
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               450, // drivetrain rpm is 360
-                              2 // horizontal drift is 2 (for now)
+                              2.2 // horizontal drift is 2.2
 );// odometry settings
 
 inline lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel 1, set to null
@@ -111,7 +104,7 @@ inline void Coords(void*){
         pros::delay(20);
     }
 }
-
+/*
 // Field size in inches
 constexpr double FIELD_SIZE = 144.0;
 // Offsets (in inches) from robot center
@@ -216,7 +209,7 @@ inline void position_task(void*) {
         pros::lcd::print(3, "raw mm f:%.0f r:%.0f b:%.0f", front_mm, right_mm, back_mm);
         pros::delay(200);
     }
-}
+}*/
 
 inline void intakeColorSort() {
     static bool rejecting = false;
