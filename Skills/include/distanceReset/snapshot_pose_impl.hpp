@@ -1,12 +1,10 @@
 #pragma once
-#include "distanceReset/snapshot_pose.hpp"
 #include "distanceReset/raycast.hpp"
-#include "snapshot_bindings.hpp"
+#include "snapshot_pose.hpp"
 #include <algorithm>
 #include <cmath>
-/*
 
-// Put this in the include/snapshot_pose folder
+// Put this in the include/distanceReset folder
 
 namespace snapshot_pose {
 
@@ -14,7 +12,7 @@ static inline float mm_to_in(float mm) { return mm / 25.4f; }
 
 static float sigma_in_from_meas(float z_in) {
   // VEX spec: below 200mm (~7.874"), ±15mm (~0.5906");
-  // above 200mm, ~5% of distance. :contentReference[oaicite:3]{index=3}
+  // above 200mm, ~5% of distance.
   if (z_in <= 7.874f) return 0.5906f;
   return 0.05f * z_in;
 }
@@ -32,7 +30,7 @@ static bool read_distance_median_in(
     const float z_in = mm_to_in((float)mm);
 
     // Confidence behavior is platform-dependent; PROS also exposes confidence (0..63).
-    // Only gate confidence when distance > 200mm, because below 200mm many APIs clamp confidence. :contentReference[oaicite:4]{index=4}
+    // Only gate confidence when distance > 200mm, because below 200mm many APIs clamp confidence.
     bool ok = (z_in >= cfg.min_range_in && z_in <= cfg.max_range_in);
 
     if (ok && sc.use_confidence_gate) {
@@ -44,7 +42,7 @@ static bool read_distance_median_in(
     pros::delay(cfg.sample_delay_ms);
   }
 
-  if (vals.size() < (std::size_t)std::max(3, cfg.samples / 2)) return false;
+  if (vals.size() < (std::size_t)std::max(2, cfg.samples / 2)) return false;
 
   std::sort(vals.begin(), vals.end());
   out_z_in = vals[vals.size() / 2];
@@ -138,8 +136,8 @@ SnapshotResult snapshot_setpose(
 
   if (sensors.size() < 2) return res;
 
-struct Meas {
-  float z_in;
+  struct Meas {
+    float z_in;
     Vec2 o_field;
     Vec2 d_field;
     std::uint32_t mask;        // NEW: the mask used for this sensor
@@ -209,7 +207,7 @@ struct Meas {
   for (int code = 0; code < combos; ++code) {
     idx_to_choice(code, choice);
 
-    // Build “robot-center locus segment” for each sensor:
+    // Build "robot-center locus segment" for each sensor:
     // If obstacle segment is A->B, then possible robot centers are:
     // X(u) = (A + u(B-A)) - o_field - d_field*z, u in [0,1]
     std::vector<Vec2> L0, L1;
@@ -292,4 +290,4 @@ struct Meas {
   return res;
 }
 
-} // namespace snapshot_pose*/
+} // namespace snapshot_pose

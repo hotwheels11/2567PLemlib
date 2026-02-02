@@ -1,8 +1,8 @@
 #include "distanceReset/raycast.hpp"
 #include <algorithm>
 #include <cmath>
-/*
-// Put this in the src/snapshot_pose folder
+
+// Put this in the src/distanceReset folder
 namespace snapshot_pose {
 
 float cross(const Vec2& a, const Vec2& b) { return a.x * b.y - a.y * b.x; }
@@ -73,4 +73,4 @@ std::vector<RayHit> raycast_all(
   return hits;
 }
 
-} // namespace snapshot_pose*/
+} // namespace snapshot_pose

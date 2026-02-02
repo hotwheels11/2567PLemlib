@@ -1,85 +1,104 @@
-// src/snapshot_pose/snapshot_bindings.cpp
+// src/distanceReset/snapshot_bindings.cpp
 //
-// Snapshot Pose “bindings” layer:
+// Snapshot Pose "bindings" layer:
 // - Keeps all configuration in ONE place.
-// - Your auton should only call snapshot_pose::snapshot_setpose_quadrant(...).
+// - Your auton should only call snapshot_pose::snapshot_setpose_simple().
 //
 // What this does:
 // - Reads 2–3 Distance sensors (median-filtered).
 // - Uses raycasts against the collision map segments to infer robot (x,y) on the field.
-// - Applies odom.set_position(x, y, heading, forwardTracker, sidewaysTracker).
+// - Applies chassis.setPose(x, y, heading) for LemLib.
 //
 // Reliability defaults:
 // - Perimeter-only by default (walls are the most stable landmarks).
-// - Per-sensor masks supported: low sensors can ignore interior objects that they can’t see.
+// - Per-sensor masks supported: low sensors can ignore interior objects that they can't see.
 //
-// Coordinate system (must match your JAR odom):
+// Coordinate system (JAR to LemLib conversion):
 // - Field is 144" x 144".
-// - (0,0) bottom-left, +X right, +Y up.
-// - heading_deg is JAR convention: 0° = +Y, clockwise-positive. :contentReference[oaicite:3]{index=3}
+// - JAR: (0,0) bottom-left, +X right, +Y up, heading 0° = +Y (north), clockwise-positive
+// - LemLib: (0,0) center, +X right, +Y up, heading 0° = +X (east), counter-clockwise positive
+// - This file handles the conversion automatically
 
 #include "distanceReset/snapshot_bindings.hpp"
+#include "lemlib/api.hpp"
+#include "pros/distance.hpp"
+#include "pros/llemu.hpp"
 
-// EDIT: include the header where your JAR odom instance is declared/defined.
-#include "main.h"   // replace if your project uses a different global header
-#include "ExternalSystems.hpp" // IWYU pragma: keep
-/*
+// Declare only what we need from ExternalSystems.hpp as extern.
+// Do NOT #include "ExternalSystems.hpp" here - all those inline globals
+// would get duplicated into this compilation unit and can cause hangs on PROS.
+extern lemlib::Chassis chassis;
+extern pros::Distance left_sensor;
+extern pros::Distance back_left_sensor;
+extern pros::Distance back_right_sensor;
+
 namespace snapshot_pose {
 
 // -------------------------------
-// EDIT SECTION 1: ODOM ACCESS
+// LemLib Odometry Wrapper
 // -------------------------------
-//
-// You must have a global or accessible odom object with:
-//   - float X_position, Y_position, orientation_deg
-//   - void set_position(float x, float y, float heading_deg, float fwdTrackerIn, float sideTrackerIn)
-//     (documented by JAR) :contentReference[oaicite:4]{index=4}
-//
-// If your odom is in a namespace or singleton, update the references below.
-
-extern decltype(fdim) odom; // If this fails, replace with your exact odom type and symbol name.
+// This wrapper converts between JAR and LemLib coordinate systems
+struct LemLibOdomWrapper {
+    lemlib::Chassis* chassis_ptr;
+    
+    // JAR expects: set_position(x_jar, y_jar, heading_jar, fwd_tracker, side_tracker)
+    // where x_jar, y_jar are in bottom-left origin, heading_jar is 0=north, CW+
+    void set_position(float x_jar, float y_jar, float heading_jar, float fwd_tracker, float side_tracker) {
+        // Convert JAR coordinates to LemLib coordinates
+        // JAR: (0,0) = bottom-left, LemLib: (0,0) = center
+        float x_lemlib = x_jar - 72.0f;  // 72 = field_size/2
+        float y_lemlib = y_jar - 72.0f;
+        
+        // Convert JAR heading to LemLib heading
+        // JAR: 0° = north (+Y), CW+
+        // LemLib: 0° = east (+X), CCW+
+        // Conversion: lemlib_heading = 90 - jar_heading
+        float heading_lemlib = 90.0f - heading_jar;
+        
+        // Normalize to -180 to 180
+        while (heading_lemlib > 180.0f) heading_lemlib -= 360.0f;
+        while (heading_lemlib < -180.0f) heading_lemlib += 360.0f;
+        
+        // LemLib setPose takes (x, y, theta) only - no tracker arguments
+        chassis_ptr->setPose(x_lemlib, y_lemlib, heading_lemlib);
+    }
+};
 
 // -------------------------------
-// EDIT SECTION 2: DISTANCE SENSORS
+// EDIT SECTION 1: DISTANCE SENSORS
 // -------------------------------
-//
-// If you already define these sensors elsewhere, replace these with `extern`
-// and include the correct header above.
-//
-// Example:
-//   extern pros::Distance distFront;
-//   extern pros::Distance distRight;
-
-static pros::Distance distFront(1); // EDIT: port
-static pros::Distance distRight(2); // EDIT: port
-// static pros::Distance distLeft(3); // optional third sensor
+// Using the sensors defined in ExternalSystems.hpp
+// These are already declared as:
+// - pros::Distance left_sensor(17);
+// - pros::Distance back_left_sensor(9);
+// - pros::Distance back_right_sensor(21);
 
 // -------------------------------
-// EDIT SECTION 3: TRACKERS + HEADING SOURCES
+// EDIT SECTION 2: HEADING AND TRACKER SOURCES
 // -------------------------------
-//
-// Snapshot pose assumes heading is correct and solves translation (x,y).
-// Prefer to use the SAME heading variable your odom update uses.
-//
-// Trackers: set_position() takes current tracker distances (inches). :contentReference[oaicite:5]{index=5}
-// If you have tracking wheels, provide the current distances in inches.
-// If you do NOT have tracking wheels, you can return 0.0f for both.
-
 static float get_heading_jar_deg() {
-  // Preferred: reuse odom's heading (already in JAR convention)
-  return chassis.getPose().theta;
+    // Get LemLib heading and convert to JAR convention
+    lemlib::Pose pose = chassis.getPose();
+    float heading_lemlib = pose.theta;
+    
+    // Convert: jar_heading = 90 - lemlib_heading
+    float heading_jar = 90.0f - heading_lemlib;
+    
+    // Normalize to 0-360
+    while (heading_jar < 0.0f) heading_jar += 360.0f;
+    while (heading_jar >= 360.0f) heading_jar -= 360.0f;
+    
+    return heading_jar;
 }
 
 static float get_forward_tracker_in() {
-  // EDIT:
-  // return forwardTracker.get_position_in();  // your function
-  return 0.0f;
+    // LemLib tracks internally - we return 0 since setPose doesn't use this
+    return 0.0f;
 }
 
 static float get_sideways_tracker_in() {
-  // EDIT:
-  // return sidewaysTracker.get_position_in(); // your function
-  return 0.0f;
+    // LemLib tracks internally - we return 0 since setPose doesn't use this
+    return 0.0f;
 }
 
 // -------------------------------
@@ -90,133 +109,177 @@ static std::vector<DistanceSensorConfig> g_sensors;
 static bool g_init = false;
 
 static void init_once() {
-  if (g_init) return;
-  g_init = true;
+    if (g_init) return;
+    g_init = true;
 
-  // -------- Global snapshot config (safe defaults) --------
-  g_cfg.field_mask = MAP_PERIMETER;        // default fallback if per-sensor override is 0
-  g_cfg.candidates_per_sensor = 1;         // perimeter-only: 1 candidate is usually enough
-  g_cfg.samples = 5;                       // median of 5 readings
-  g_cfg.sample_delay_ms = 35;
-  g_cfg.max_chi2_per_sensor = 9.0f;        // ~3-sigma per sensor
-  //g_cfg.quadrant_margin_in = 2.0f;
+    // -------- Global snapshot config (safe defaults) --------
+    g_cfg.field_mask = MAP_PERIMETER;        // default fallback if per-sensor override is 0
+    g_cfg.candidates_per_sensor = 1;         // perimeter-only: 1 candidate is usually enough
+    g_cfg.samples = 3;                       // median of 3 readings (was 5 — reduced to cut blocking time)
+    g_cfg.sample_delay_ms = 10;              // 10 ms between reads (was 35 ms)
+                                             // Total read time: 3 sensors × 3 samples × 10 ms = 90 ms (was 525 ms)
+    g_cfg.max_chi2_per_sensor = 9.0f;        // ~3-sigma per sensor
 
-  // If you enable interior objects globally, increase candidates:
-  // g_cfg.field_mask = MAP_PERIMETER | MAP_LONG_GOALS | MAP_CENTER_GOALS;
-  // g_cfg.candidates_per_sensor = 2;
+    // If you enable interior objects globally, increase candidates:
+    // g_cfg.field_mask = MAP_PERIMETER | MAP_LONG_GOALS | MAP_CENTER_GOALS;
+    // g_cfg.candidates_per_sensor = 2;
 
-  // -------- Sensor definitions --------
-  //
-  // Units:
-  //   x_right_in: inches from robot center, + to robot-right
-  //   y_fwd_in:   inches from robot center, + to robot-forward
-  //
-  // rel_deg (relative to robot forward):
-  //   0   = forward
-  //   +90 = right
-  //   180 = back
-  //   -90 = left
-  //
-  // field_mask_override:
-  //   0          => use g_cfg.field_mask
-  //   nonzero    => use this mask for THIS sensor
+    // -------- Sensor definitions --------
+    //
+    // IMPORTANT: Coordinate system for sensor offsets:
+    // - x_right_in: inches from robot center, + to robot-right
+    // - y_fwd_in: inches from robot center, + to robot-forward
+    //
+    // rel_deg (relative to robot forward):
+    // - 0 = forward
+    // - +90 = right
+    // - 180 = back
+    // - -90 = left
+    //
+    // You MUST measure these offsets from YOUR robot's center to each sensor!
 
-  g_sensors.clear();
-  g_sensors.reserve(3);
+    g_sensors.clear();
+    g_sensors.reserve(3);
 
-  // FRONT sensor (often low on the robot)
-  {
-    DistanceSensorConfig s{};
-    s.dev = &distFront;
+    // LEFT sensor (port 17)
+    {
+        DistanceSensorConfig s{};
+        s.dev = &left_sensor;
 
-    // EDIT: measure these offsets
-    s.x_right_in = 0.0f;
-    s.y_fwd_in   = 7.0f;
-    s.rel_deg    = 0.0f;
+        // EDIT: Measure these offsets from YOUR robot!
+        // Example values - REPLACE WITH YOUR MEASUREMENTS
+        s.x_right_in = -5.0f;  // negative = left of center
+        s.y_fwd_in   = 0.0f;   // at robot center front-to-back
+        s.rel_deg    = -90.0f; // facing left
 
-    // Per-sensor mask example:
-    // Low-mounted sensor: only trust walls.
-    s.field_mask_override = MAP_PERIMETER;
+        // Per-sensor mask: only trust walls for this sensor
+        s.field_mask_override = MAP_PERIMETER;
 
-    // Confidence gating (0..63) only meaningful when distance > 200mm. :contentReference[oaicite:6]{index=6}
-    s.use_confidence_gate = true;
-    s.min_confidence = 35;
+        // Confidence gating (0..63) only meaningful when distance > 200mm
+        s.use_confidence_gate = true;
+        s.min_confidence = 35;
 
-    // Optional gates (off by default):
-    s.use_velocity_gate = false;
-    s.use_object_size_gate = false;
+        g_sensors.push_back(s);
+    }
 
-    g_sensors.push_back(s);
-  }
+    // BACK LEFT sensor (port 9)
+    {
+        DistanceSensorConfig s{};
+        s.dev = &back_left_sensor;
 
-  // RIGHT sensor (maybe higher / different height)
-  {
-    DistanceSensorConfig s{};
-    s.dev = &distRight;
+        // EDIT: Measure these offsets from YOUR robot!
+        // Example values - REPLACE WITH YOUR MEASUREMENTS
+        s.x_right_in = -3.0f;  // left of center
+        s.y_fwd_in   = -6.0f;  // negative = behind robot center
+        s.rel_deg    = 180.0f; // facing back
 
-    // EDIT: measure these offsets
-    s.x_right_in = 7.0f;
-    s.y_fwd_in   = 0.0f;
-    s.rel_deg    = 90.0f;
+        s.field_mask_override = MAP_PERIMETER;
+        s.use_confidence_gate = true;
+        s.min_confidence = 35;
 
-    // If this sensor can “see” taller interior objects reliably, enable them here.
-    // Example: walls + long goals only
-    s.field_mask_override = MAP_PERIMETER | MAP_LONG_GOALS;
+        g_sensors.push_back(s);
+    }
 
-    s.use_confidence_gate = true;
-    s.min_confidence = 35;
+    // BACK RIGHT sensor (port 21)
+    {
+        DistanceSensorConfig s{};
+        s.dev = &back_right_sensor;
 
-    s.use_velocity_gate = false;
-    s.use_object_size_gate = false;
+        // EDIT: Measure these offsets from YOUR robot!
+        // Example values - REPLACE WITH YOUR MEASUREMENTS
+        s.x_right_in = 3.0f;   // right of center
+        s.y_fwd_in   = -6.0f;  // negative = behind robot center
+        s.rel_deg    = 180.0f; // facing back
 
-    g_sensors.push_back(s);
-  }
+        s.field_mask_override = MAP_PERIMETER;
+        s.use_confidence_gate = true;
+        s.min_confidence = 35;
 
-  // OPTIONAL third sensor:
-  // - Helpful if you sometimes cannot see two perpendicular walls due to range limits.
-  //
-  // {
-  //   DistanceSensorConfig s{};
-  //   s.dev = &distLeft;
-  //   s.x_right_in = -7.0f;
-  //   s.y_fwd_in = 0.0f;
-  //   s.rel_deg = -90.0f;
-  //   s.field_mask_override = MAP_PERIMETER;
-  //   g_sensors.push_back(s);
-  // }
+        g_sensors.push_back(s);
+    }
 
-  pros::lcd::print(6, "SnapshotPose init OK");
+    pros::lcd::print(6, "SnapshotPose init OK");
+}
+
+// -------------------------------
+// Internal helper to get guess pose based on quadrant
+// -------------------------------
+static void get_guess_pose_from_quadrant(Quadrant q, float& guess_x_jar, float& guess_y_jar) {
+    // Get current pose from LemLib
+    lemlib::Pose current_pose = chassis.getPose();
+    
+    // Default: convert current LemLib pose to JAR coordinates
+    guess_x_jar = current_pose.x + 72.0f;
+    guess_y_jar = current_pose.y + 72.0f;
+    
+    // If quadrant is specified, bias the guess toward that quadrant's center
+    switch (q) {
+        case Quadrant::BOTTOM_LEFT:
+            // Center of bottom-left quadrant in JAR coords
+            guess_x_jar = 36.0f;
+            guess_y_jar = 36.0f;
+            break;
+            
+        case Quadrant::BOTTOM_RIGHT:
+            // Center of bottom-right quadrant in JAR coords
+            guess_x_jar = 108.0f;
+            guess_y_jar = 36.0f;
+            break;
+            
+        case Quadrant::TOP_LEFT:
+            // Center of top-left quadrant in JAR coords
+            guess_x_jar = 36.0f;
+            guess_y_jar = 108.0f;
+            break;
+            
+        case Quadrant::TOP_RIGHT:
+            // Center of top-right quadrant in JAR coords
+            guess_x_jar = 108.0f;
+            guess_y_jar = 108.0f;
+            break;
+            
+        case Quadrant::AUTO:
+            // Use current odometry (already set above)
+            break;
+    }
 }
 
 // -------------------------------
 // Public API called by auton
 // -------------------------------
-SnapshotResult snapshot_setpose_quadrant(Quadrant q) {
-  init_once();
-
-  // Heading and tracker readings (inches) must match your odom usage. :contentReference[oaicite:7]{index=7}
-  const float heading_deg = get_heading_jar_deg();
-  const float fwd_in = get_forward_tracker_in();
-  const float side_in = get_sideways_tracker_in();
-
-  // Guess pose is used only to choose candidate segments for each sensor.
-  // If you pass a quadrant, the solver also biases the guess toward that quadrant internally.
-  const float guess_x = chassis.getPose().x;
-  const float guess_y = chassis.getPose().y;
-
-  // Strongly recommended: call this while the robot is stopped.
-  // (Do drive.brake(); delay(150-250ms); in auton before calling.)
-
-  return snapshot_setpose(
-    odom,
-    g_sensors,
-    g_cfg,
-    heading_deg,
-    fwd_in,
-    side_in,
-    guess_x,
-    guess_y
-  );
+SnapshotResult snapshot_setpose_simple() {
+    return snapshot_setpose_quadrant(Quadrant::AUTO);
 }
 
-} // namespace snapshot_pose*/
+SnapshotResult snapshot_setpose_quadrant(Quadrant q) {
+    init_once();
+
+    // Get guess pose based on quadrant
+    float guess_x_jar, guess_y_jar;
+    get_guess_pose_from_quadrant(q, guess_x_jar, guess_y_jar);
+    
+    // Get heading in JAR convention
+    const float heading_deg = get_heading_jar_deg();
+    const float fwd_in = get_forward_tracker_in();
+    const float side_in = get_sideways_tracker_in();
+
+    // Create LemLib wrapper for odometry updates
+    LemLibOdomWrapper odom_wrapper;
+    odom_wrapper.chassis_ptr = &chassis;
+
+    // Strongly recommended: call this while the robot is stopped.
+    // (Do chassis.waitUntilDone(); pros::delay(150-250); in auton before calling.)
+
+    return snapshot_setpose(
+        odom_wrapper,
+        g_sensors,
+        g_cfg,
+        heading_deg,
+        fwd_in,
+        side_in,
+        guess_x_jar,
+        guess_y_jar
+    );
+}
+
+} // namespace snapshot_pose

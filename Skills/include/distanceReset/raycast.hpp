@@ -3,8 +3,7 @@
 #include <vector>
 #include "distanceReset/collision_map.hpp"
 
-/*
-// Put this in the include/snapshot_pose folder
+// Put this in the include/distanceReset folder
 
 namespace snapshot_pose {
 
@@ -30,4 +29,4 @@ std::vector<RayHit> raycast_all(
   std::uint32_t allow_mask
 );
 
-} // namespace snapshot_pose*/
+} // namespace snapshot_pose

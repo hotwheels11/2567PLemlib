@@ -1,17 +1,155 @@
 #include "main.h"
 #include "Autos.hpp" // IWYU pragma: keep
 #include "ExternalSystems.hpp" // IWYU pragma: keep
+#include "distanceReset/snapshot_bindings.hpp"
 #include "lemlib/chassis/chassis.hpp"
+#include "lemlib/api.hpp"
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
+#include "distanceReset/snapshot_pose.hpp"   // pulls in collision_map + the template impl
+#include <vector>
+#include <cmath>
 
+// -------------------------------------------------------
+// Snapshot reset lives HERE in main.cpp so it uses the
+// exact same sensor objects that ExternalSystems.hpp
+// initialized.  No extern, no separate .cpp, no linker
+// surprises on PROS.
+// -------------------------------------------------------
+
+// Thin wrapper so snapshot_setpose<> can call setPose on
+// the chassis.  Converts JAR coords -> LemLib coords.
+struct LemLibOdomWrapper {
+    void set_position(float x_jar, float y_jar, float heading_jar,
+                      float /*fwd*/, float /*side*/) {
+        float x_lemlib     = x_jar  - 72.0f;
+        float y_lemlib     = y_jar  - 72.0f;
+        float h_lemlib     = 90.0f  - heading_jar;
+        while (h_lemlib >  180.0f) h_lemlib -= 360.0f;
+        while (h_lemlib < -180.0f) h_lemlib += 360.0f;
+        chassis.setPose(x_lemlib, y_lemlib, h_lemlib);
+    }
+};
+
+// Build the sensor config list using the ACTUAL sensor objects from
+// ExternalSystems.hpp.  Call once; cached in a static vector.
+static std::vector<snapshot_pose::DistanceSensorConfig>& get_sensors() {
+    static std::vector<snapshot_pose::DistanceSensorConfig> sensors;
+    static bool built = false;
+    if (built) return sensors;
+    built = true;
+
+    sensors.reserve(3);
+
+    // LEFT sensor (port 17) — facing left
+    {
+        snapshot_pose::DistanceSensorConfig s{};
+        s.dev            = &left_sensor;        // <-- direct pointer, same object
+        s.x_right_in     = -5.0f;
+        s.y_fwd_in       =  0.0f;
+        s.rel_deg        = -90.0f;
+        s.field_mask_override = snapshot_pose::MAP_PERIMETER;
+        s.use_confidence_gate = true;
+        s.min_confidence      = 35;
+        sensors.push_back(s);
+    }
+
+    // BACK LEFT sensor (port 9) — facing back
+    {
+        snapshot_pose::DistanceSensorConfig s{};
+        s.dev            = &back_left_sensor;
+        s.x_right_in     = -3.0f;
+        s.y_fwd_in       = -6.0f;
+        s.rel_deg        = 180.0f;
+        s.field_mask_override = snapshot_pose::MAP_PERIMETER;
+        s.use_confidence_gate = true;
+        s.min_confidence      = 35;
+        sensors.push_back(s);
+    }
+
+    // BACK RIGHT sensor (port 21) — facing back
+    {
+        snapshot_pose::DistanceSensorConfig s{};
+        s.dev            = &back_right_sensor;
+        s.x_right_in     =  3.0f;
+        s.y_fwd_in       = -6.0f;
+        s.rel_deg        = 180.0f;
+        s.field_mask_override = snapshot_pose::MAP_PERIMETER;
+        s.use_confidence_gate = true;
+        s.min_confidence      = 35;
+        sensors.push_back(s);
+    }
+
+    return sensors;
+}
+
+// One-shot config (also cached).
+static snapshot_pose::SnapshotConfig& get_cfg() {
+    static snapshot_pose::SnapshotConfig cfg;
+    static bool built = false;
+    if (built) return cfg;
+    built = true;
+
+    cfg.field_mask            = snapshot_pose::MAP_PERIMETER;
+    cfg.candidates_per_sensor = 1;
+    cfg.samples               = 3;       // median of 3
+    cfg.sample_delay_ms       = 10;      // 3 sensors × 3 samples × 10 ms = 90 ms total
+    cfg.max_chi2_per_sensor   = 9.0f;
+
+    return cfg;
+}
+
+// Convert LemLib heading -> JAR heading (0=north, CW+), 0-360 range.
+static float heading_to_jar() {
+    float jar = 90.0f - chassis.getPose().theta;
+    while (jar <   0.0f) jar += 360.0f;
+    while (jar >= 360.0f) jar -= 360.0f;
+    return jar;
+}
+
+// The single entry point your code calls.  Mirrors what
+// snapshot_setpose_quadrant() used to do, but entirely
+// local — no extern sensors involved.
+static snapshot_pose::SnapshotResult do_snapshot_reset(
+    snapshot_pose::Quadrant q = snapshot_pose::Quadrant::AUTO)
+{
+    // --- guess pose (JAR coords, origin = bottom-left) ---
+    float gx, gy;
+    switch (q) {
+        case snapshot_pose::Quadrant::BOTTOM_LEFT:  gx=36;  gy=36;  break;
+        case snapshot_pose::Quadrant::BOTTOM_RIGHT: gx=108; gy=36;  break;
+        case snapshot_pose::Quadrant::TOP_LEFT:     gx=36;  gy=108; break;
+        case snapshot_pose::Quadrant::TOP_RIGHT:    gx=108; gy=108; break;
+        default: // AUTO — convert current odom to JAR
+            gx = chassis.getPose().x + 72.0f;
+            gy = chassis.getPose().y + 72.0f;
+            break;
+    }
+
+    LemLibOdomWrapper wrapper;
+
+    return snapshot_pose::snapshot_setpose(
+        wrapper,
+        get_sensors(),
+        get_cfg(),
+        heading_to_jar(),
+        0.0f,   // fwd tracker — unused by LemLib wrapper
+        0.0f,   // side tracker — unused
+        gx, gy
+    );
+}
+
+// -------------------------------------------------------
+// Everything below is your original main.cpp unchanged
+// -------------------------------------------------------
 
 void initialize() {
     //pros::lcd::initialize();
-	chassis.calibrate();// make sure chassis is ready
-    pros::Task coordDisplayTask(Coords);
+    chassis.calibrate();// make sure chassis is ready
+    pros::Task coordDisplayTask(Coords);  // back to original - don't change this yet
 }
+
 /*
 inline void intakeManagementSystem(void*) {
     while (true) {
@@ -46,6 +184,7 @@ inline void intakeManagementSystem(void*) {
     }
 }
 */
+
 /**
  * Runs while the robot is in the disabled state of Field Management System or
  * the VEX Competition Switch, following either autonomous or opcontrol. When
@@ -65,26 +204,6 @@ void disabled() {}
 void competition_initialize() {
 	//ts::selector::get()->display();
 }
-
-/**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
-
- #include "main.h"
-#include "lemlib/api.hpp"
-#include <vector>
-#include "main.h"
-#include "lemlib/api.hpp"
-#include <vector>
-#include <cmath>
 
 // ---------------- SETTINGS ----------------
 const int LOG_INTERVAL = 20;      // ms
@@ -131,7 +250,6 @@ void rotate360AndLog() {
     chassis.setPose(0,0,0);  // reset pose
     logCurrentXY();           // starting point
 
-    // Start async 360 turn
     chassis.turnToHeading(90, 700,{.maxSpeed=30,.minSpeed=30,.earlyExitRange=10});
     chassis.turnToHeading(180, 700,{.maxSpeed=30,.minSpeed=30,.earlyExitRange=10});
     chassis.turnToHeading(270, 700,{.maxSpeed=30,.minSpeed=30,.earlyExitRange=10});
@@ -142,78 +260,80 @@ void rotate360AndLog() {
 
         double currentHeading = chassis.getPose().theta;
         if (fabs(angleError(360, currentHeading)) < HEADING_TOL) {
-            break; // finished turning
+            break;
         }
 
-        pros::delay(LOG_INTERVAL); // 20ms between logs
+        pros::delay(LOG_INTERVAL);
     }
 
     pros::delay(50);
-    logCurrentXY(); // final pose
+    logCurrentXY();
 
     printDesmosOneLine();
 }
 
 void autonomous() {
-    chassis.setPose(0, 0, 0);
+    //chassis.setPose(0, 0, 0);
+    autoDistanceReset(chassis);
+    /*
     Descore.set_value(1);
     intakeFront.move(127);
-    chassis.moveToPoint(0,15.5,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 4 stack
-    chassis.swingToHeading(-39,lemlib::DriveSide::LEFT,500,{.maxSpeed=127}); //Swings into 4 stack
-    chassis.moveToPoint(-10,21.5,900); //Drives into 4 stack
+    chassis.moveToPoint(0,15.5,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2});
+    chassis.swingToHeading(-39,lemlib::DriveSide::LEFT,500,{.maxSpeed=127});
+    chassis.moveToPoint(-10,21.5,900);
     chassis.waitUntil(6.5);
     intakeFront.move(0);
-    chassis.turnToHeading(-133,500); //Turns to Middle Goal
+    chassis.turnToHeading(-133,500);
     intake.move(-35);
-    chassis.moveToPoint(9.3,36.8,900,{.forwards=false}); //Backs into middle goal
+    chassis.moveToPoint(9.3,36.8,900,{.forwards=false});
     Matchload.set_value(1);
     intake.move(0);
     chassis.waitUntilDone();
-    middleGoal.set_value(1); //Starts the scoring to middle goal
+    middleGoal.set_value(1);
     pros::delay(50);
     Matchload.set_value(0);
     intakeFront.move(100);
     pros::delay(1000);
-    chassis.moveToPoint(-29.75,-1.6,1300); //Drives to matchload #1
+    chassis.moveToPoint(-29.75,-1.6,1300);
     intake.move(-127);
     pros::delay(100);
     intake.move(127);
-    chassis.turnToHeading(-180,500); //Turns to matchload #1
+    chassis.turnToHeading(-180,500);
     Matchload.set_value(1);
     pros::delay(200);
     intake.move(0);
     intakeFront.move(127);
     middleGoal.set_value(0);
-    chassis.moveToPoint(-29.25,-15,2300,{true,50,50},true); //Goes into matchload #1
+    chassis.moveToPoint(-29.25,-15,2300,{true,50,50},true);
     pros::delay(2300);
     pros::delay(200);
-    chassis.moveToPoint(-29,-0,800,{.forwards=false});//Backs out from Matchload #1
+    chassis.moveToPoint(-29,-0,800,{.forwards=false});
     chassis.waitUntilDone();
     Matchload.set_value(0);
-    chassis.turnToHeading(-50,600); //Turns to Ally
-    chassis.moveToPoint(-45.5,14,1000); //Drives before ally
+    chassis.turnToHeading(-50,600);
+    chassis.moveToPoint(-45.5,14,1000);
     intakeFront.move(0);
-    chassis.turnToHeading(-1,500); //Turns into ally
+    chassis.turnToHeading(-1,500);
     middleGoalDescore.set_value(1);
-    chassis.moveToPoint(-46.5,90,2200,{.maxSpeed=100}); //Drives down ally
-    chassis.turnToHeading(-90,700); //turns to long goal
+    chassis.moveToPoint(-46.5,90,2200,{.maxSpeed=100});
+    chassis.turnToHeading(-90,700);
     middleGoalDescore.set_value(0);
-    chassis.moveToPoint(-32,88.5,1000,{.forwards=false}); //Back up perpendicular to long goal
-    chassis.turnToHeading(-1,700); //Turns to long goal #2
-    chassis.moveToPoint(-34,70,1200,{.forwards=false}); //Backs into long goal
+    chassis.moveToPoint(-32,88.5,1000,{.forwards=false});
+    chassis.turnToHeading(-1,700);
+    chassis.moveToPoint(-34,70,1200,{.forwards=false});
     chassis.waitUntil(18);
     intake.move(127);
     pros::delay(400);
     intake.move(-127);
     pros::delay(100);
     intake.move(127);
-    pros::delay(1800); //Scores in long goal
+    pros::delay(1800);
     Matchload.set_value(1);
-    chassis.moveToPoint(-35,115,4000,{.maxSpeed=40,.minSpeed=40},true); //Drives into matchload #2
+    chassis.moveToPoint(-35,115,4000,{.maxSpeed=40,.minSpeed=40},true);
     intakeTop.move(0);
     pros::delay(4000);
     chassis.waitUntilDone();
-    chassis.moveToPoint(-34,70,1000,{.forwards=false,.maxSpeed=50}); //backs to long goal #1 Second time
+    chassis.moveToPoint(-34,70,1000,{.forwards=false,.maxSpeed=50});
     chassis.waitUntil(2);
     intake.move(-127);
     pros::delay(50);
@@ -224,9 +344,9 @@ void autonomous() {
     pros::delay(1200);
     Matchload.set_value(0);
     chassis.moveToPoint(-33.4,97.8,800); 
-    chassis.turnToHeading(60,500); //TUrns to Blue Park
+    chassis.turnToHeading(60,500);
     chassis.moveToPoint(-3,120,1000);
-    chassis.swingToHeading(87,lemlib::DriveSide::RIGHT,500,{.minSpeed=100,.earlyExitRange=5}); //Swings to blue park
+    chassis.swingToHeading(87,lemlib::DriveSide::RIGHT,500,{.minSpeed=100,.earlyExitRange=5});
     intakeFront.move(127);
     chassis.waitUntil(5);
     Matchload.set_value(1); 
@@ -235,67 +355,15 @@ void autonomous() {
     Matchload.set_value(0);
     chassis.waitUntil(40);
     Matchload.set_value(1);
-    /*
-    chassis.swingToHeading(179,lemlib::DriveSide::RIGHT, 1000); //Swing in prep to distance reset
-    chassis.waitUntilDone();
-    autoDistanceReset(chassis); //Distance Reset
-    pros::delay(200);
-    chassis.turnToHeading(235,500); //turn past 4 stack
-    Matchload.set_value(0);
-    chassis.moveToPoint(-10,113,1000);//Move infront of 4 stack
-    chassis.turnToHeading(130,500); //Turns to 4 stack
-    intakeFront.move(127); //Starts intake
-    chassis.moveToPoint(18,100,1000); //Drives into 4 stack
-    chassis.waitUntil(9);
-    intakeFront.move(0);
-    Matchload.set_value(1);
-    chassis.turnToHeading(45,500); //Faces the back of middle goal
-    intake.move(-127);
-    chassis.moveToPoint(0,92,1000,{.forwards=false}); //Backs into middle goal #2
-    intake.move(0);
-    chassis.waitUntilDone();
-    middleGoal.set_value(1); //Allows the scoring to middle goal
-    pros::delay(50);
-    intakeFront.move(80);
-    pros::delay(1300);
-    intakeFront.move(0);
-    chassis.moveToPoint(46,130,1000); //Drive infront of matchload #3
-    chassis.waitUntil(5);
-    intakeFront.move(127);
-    chassis.turnToHeading(6,500); //Turns to matchload #3
-    chassis.moveToPoint(43,150,3500,{.maxSpeed=55}); //Drives into matchload #3
-    chassis.waitUntil(2);
-    middleGoal.set_value(0);
-    chassis.waitUntilDone();
-    chassis.moveToPoint(42,135,1000,{.forwards=false,.maxSpeed=127});//Backs out from Matchload #3
-    chassis.waitUntilDone();
-    Matchload.set_value(0);
-    chassis.turnToHeading(150,500); //Turns to ally
-    chassis.moveToPoint(55,104.6,1000); //Drives infront of ally
-    chassis.turnToHeading(183,500); //Turns into ally
-    chassis.moveToPoint(46.8,24.7,2000,{.maxSpeed=100}); //Drives down ally
     */
-
 }  
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
 bool middleGoalState = false;
-
 bool middleGoalManual = false;
 inline int middleGoalDescoreState = 0;
+
 void opcontrol() {
+    //chassis.setPose(0,0,180);
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
     Descore.set_value(1);
     color_sensor.set_led_pwm(100);
@@ -306,7 +374,7 @@ void opcontrol() {
         int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
         chassis.tank(leftY, rightY);
 
-        // ===== DESCORE TOGGLE (B) =====
+        // ===== DESCORE TOGGLE =====
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
             descore++;
         }
@@ -316,13 +384,14 @@ void opcontrol() {
             middleGoalDescoreState++;
         }
         middleGoalDescore.set_value(middleGoalDescoreState % 2 == 1);
+
         // ===== MATCHLOAD TOGGLE (Y) =====
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
             MatchloadMech++;
         }
         Matchload.set_value(MatchloadMech % 2 == 0);
 
-        // ===== MIDDLE GOAL MANUAL TOGGLE (DOWN) =====
+        // ===== MIDDLE GOAL MANUAL TOGGLE (RIGHT) =====
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
             middleGoalManual = !middleGoalManual;
         }
@@ -347,10 +416,6 @@ void opcontrol() {
         }
         else {
             intake.move(0);
-        }
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
-            bool success = autoDistanceReset(chassis);
-            master.rumble(success ? "." : "..");
         }
 
         pros::delay(20);

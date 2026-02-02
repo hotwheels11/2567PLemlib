@@ -5,8 +5,7 @@
 #include "pros/distance.hpp"
 #include "distanceReset/collision_map.hpp"
 
-/*
-// Put this in the include/snapshot_pose folder
+// Put this in the include/distanceReset folder
 
 namespace snapshot_pose {
 
@@ -50,7 +49,7 @@ struct SnapshotConfig {
   int samples = 7;
   int sample_delay_ms = 10;
 
-  // VEX spec: range 20..2000mm. Below 200mm, ~±15mm; above 200mm, ~5%. :contentReference[oaicite:1]{index=1}
+  // VEX spec: range 20..2000mm. Below 200mm, ~±15mm; above 200mm, ~5%.
   float min_range_in = 0.79f;    // 20mm
   float max_range_in = 78.74f;   // 2000mm
 
@@ -63,7 +62,7 @@ struct SnapshotResult {
 
   float x_in = 0.0f;
   float y_in = 0.0f;
-  float heading_deg = 0.0f; // JAR convention: 0 = +Y, clockwise-positive :contentReference[oaicite:2]{index=2}
+  float heading_deg = 0.0f; // JAR convention: 0 = +Y, clockwise-positive
 
   int used_sensors = 0;
   float chi2 = 0.0f;
@@ -84,4 +83,4 @@ SnapshotResult snapshot_setpose(
 
 } // namespace snapshot_pose
 
-#include "distanceReset/snapshot_pose_impl.hpp"*/
+#include "distanceReset/snapshot_pose_impl.hpp"

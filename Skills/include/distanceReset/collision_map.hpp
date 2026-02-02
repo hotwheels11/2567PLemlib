@@ -1,8 +1,8 @@
 #pragma once
 #include <array>
 #include <cstdint>
-/*
-// Put this in the include/snapshot_pose folder
+
+// Put this in the include/distanceReset folder
 
 namespace snapshot_pose {
 
@@ -40,7 +40,7 @@ enum MapMask : std::uint32_t {
 };
 
 // NOTE (reliability):
-// Defaulting to perimeter-only avoids “false-short” hits on small objects.
+// Defaulting to perimeter-only avoids "false-short" hits on small objects.
 // Add interior objects only if you are confident your sensors will actually see them.
 inline constexpr std::uint32_t DEFAULT_FIELD_MASK = MAP_PERIMETER;
 
@@ -105,4 +105,4 @@ inline constexpr std::array<Segment, 44> TERMINAL_FIELD_SEGMENTS = {{
   Segment{Vec2{62.565f, 144.f}, Vec2{62.565f, 127.14f}, MAP_PARK_ZONES},
 }};
 
-} // namespace snapshot_pose*/
+} // namespace snapshot_pose
