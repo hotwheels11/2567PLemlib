@@ -1,4 +1,5 @@
 // This is where we will put exetnal system definitions
+#pragma once
 #include "lemlib/chassis/trackingWheel.hpp"
 #include "main.h"
 #include "pros/adi.hpp"
