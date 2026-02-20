@@ -11,6 +11,7 @@ void initialize() {
     //pros::lcd::initialize();
 	chassis.calibrate();// make sure chassis is ready
     pros::Task coordDisplayTask(Coords);
+    chassis.setPose(0, 0, 270);
 }
 /*
 inline void intakeManagementSystem(void*) {
@@ -79,17 +80,16 @@ void competition_initialize() {
  */
 
 void autonomous() {
-    uint32_t autoStart = pros::millis();
-    chassis.setPose(0, 0, 270);
     SnapshotResult res = do_snapshot(Quadrant::ANY); //Dih reset 
     pros::delay(75);
     Descore.set_value(1);
     intakeFront.move(127);
     chassis.moveToPoint(-4.5, -63.1, 400,{.maxSpeed=127,}); //Pushes Robot
     chassis.moveToPoint(51,-63,1800,{.forwards=false,.maxSpeed=100}); //Reverses to Matchload
-    chassis.turnToHeading(-182,450,{.minSpeed=20,.earlyExitRange=1}); //Turns to face Matchload
+    chassis.turnToHeading(-182,450,{.minSpeed=20,.earlyExitRange=3}); //Turns to face Matchload
     Matchload.set_value(1);
     chassis.moveToPoint(53,-76.5,1150,{.maxSpeed=60}); //Matchload 1
+    intakeFront.move(127);
     chassis.moveToPoint(54,-40,1300,{.forwards=false,.maxSpeed=80}); // Scores in Goal 1
     intake.move(0);
     chassis.waitUntil(25);
@@ -110,11 +110,11 @@ void autonomous() {
     chassis.turnToHeading(268,400,{}); //Turns to 3 stack #2
     chassis.waitUntilDone();
     Matchload.set_value(0);
-    chassis.moveToPoint(-22,-38,1200,{.maxSpeed=110,.minSpeed=50,.earlyExitRange=4}); //Drives to 3 stack #2
+    chassis.moveToPoint(-20,-38,1200,{.maxSpeed=110,.minSpeed=50,.earlyExitRange=4}); //Drives to 3 stack #2
     chassis.waitUntil(28);
     Matchload.set_value(1);
     chassis.turnToHeading(232,500,{.minSpeed=40,.earlyExitRange=3}); //Turns to middle goal
-    chassis.moveToPoint(-8.75,-27,800,{false}); //Reverses into middle goal
+    chassis.moveToPoint(-8.75,-27,800,{false,110}); //Reverses into middle goal
     intake.move(-127);
     pros::delay(200);
     intake.move(0);
@@ -125,21 +125,15 @@ void autonomous() {
     pros::delay(1000);
     intake.move(0);
     middleGoal.set_value(0);
-    chassis.moveToPoint(-46.25,-61.5,1200,{.minSpeed=40,.earlyExitRange=4}); //Drives infront matchload
+    chassis.moveToPoint(-46.25,-64,1200,{.minSpeed=40,.earlyExitRange=4}); //Drives infront matchload
     intake.move(0);
-    chassis.turnToHeading(181,500,{.minSpeed=40,.earlyExitRange=3}); //Turns infront of matchlaod #2
-    chassis.moveToPoint(-45.5,-83,1100,{.maxSpeed=80}); //Goes into matchload #2
+    chassis.turnToHeading(182,500,{.minSpeed=40,.earlyExitRange=3}); //Turns infront of matchlaod #2
+    chassis.moveToPoint(-44.9,-83,1100,{.maxSpeed=80}); //Goes into matchload #2
     intakeFront.move(127);
-    chassis.moveToPoint(-44.75,-40,1000,{false}); //Backs into long goal and scores
+    chassis.moveToPoint(-43.7,-40,1000,{false}); //Backs into long goal and scores
     chassis.waitUntil(23);
     intake.move(127);
     descore++;
-    uint32_t autoEnd = pros::millis();
-
-    uint32_t autoTime = autoEnd - autoStart;
-
-    printf("Auto Time: %u ms\n", autoTime);
-    printf("Auto Time: %.2f seconds\n", autoTime / 1000.0);
 }
 
 /**

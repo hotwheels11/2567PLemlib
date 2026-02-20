@@ -264,7 +264,7 @@ void autonomous() {
     chassis.waitUntilDone();
     Matchload.set_value(1);
     pros::delay(250);
-    chassis.moveToPoint(40,126,4000,{.maxSpeed=127,.minSpeed=127}); //Driving through park
+    chassis.moveToPoint(40,125,4000,{.maxSpeed=127,.minSpeed=127}); //Driving through park
     chassis.waitUntil(1.5);
     Matchload.set_value(0);
     chassis.waitUntil(35);
@@ -387,6 +387,7 @@ void opcontrol() {
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
     Descore.set_value(1);
     color_sensor.set_led_pwm(100);
+    descore++;
 
     while (true) {
         // ===== DRIVE =====

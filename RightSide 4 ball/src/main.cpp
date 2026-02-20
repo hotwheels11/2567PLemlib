@@ -82,31 +82,28 @@ void autonomous() {
     Descore.set_value(1);
     intakeFront.move(127);
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0,16,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
-    chassis.swingToHeading(30,lemlib::DriveSide::RIGHT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=2}); //Swings into 3 stack
+    chassis.moveToPoint(0,17,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
+    chassis.swingToHeading(50,lemlib::DriveSide::RIGHT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=3}); //Swings into 3 stack
     Matchload.set_value(1);
-    chassis.moveToPoint(21,37,800,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives to center of field
-    chassis.moveToPoint(21.75,10,1200,{.forwards=false,.maxSpeed=127});
-    chassis.turnToHeading(-88,400);
-    chassis.moveToPoint(30,5,550,{.forwards=false});
-    chassis.turnToHeading(-178,450);
-    chassis.moveToPoint(37.25,16,550,{.forwards=false,.maxSpeed=85,.minSpeed=40});
-    intake.move(-127);
+    Matchload.set_value(1);
+    chassis.swingToHeading(107,lemlib::DriveSide::RIGHT,500); //Turns to the bottom right corner
+    chassis.moveToPoint(36,12,1000); //Moves infront of long goal
+    chassis.turnToHeading(176,500);//Turns to long goal
+    chassis.moveToPoint(37,27,1000,{.forwards=false}); //Backs into long goal
+    chassis.waitUntil(15);
+    intakeTop.move(127);
+    Matchload.set_value(0);
+    pros::delay(1200); //Waits for intake to score
     intake.move(0);
-    chassis.waitUntilDone();
-    intake.move(127);
-    pros::delay(1350);
-    intake.move(0);
-    chassis.moveToPoint(35, 0, 800);
-    chassis.turnToHeading(-90, 500);
-    chassis.moveToPoint(43,7,800,{.forwards=false});
-    chassis.turnToHeading(-175, 500);
-    chassis.waitUntilDone();
+    chassis.moveToPoint(38.7,13.6,700); //Moves out of long goal
+    chassis.turnToHeading(266,500); //Turns to ally area
+    chassis.moveToPoint(47.4,10.5,700,{false});
+    chassis.turnToHeading(178,500); //Turns into ally
+    chassis.moveToPoint(46.2,43,1000,{false}); //Moves into ally
     Descore.set_value(0);
-    chassis.moveToPoint(48,33.5,1100,{.forwards=false,.maxSpeed=60});
     Matchload.set_value(1);
-    chassis.swingToHeading(192,lemlib::DriveSide::RIGHT,800,{.minSpeed=100});
-    MatchloadMech = 0;
+    chassis.swingToHeading(200,lemlib::DriveSide::RIGHT,500,{.minSpeed=100}); //Swings to lock
+    
 }
 
 /**
