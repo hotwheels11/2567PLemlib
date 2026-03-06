@@ -82,28 +82,28 @@ void autonomous() {
     Descore.set_value(1);
     intakeFront.move(127);
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0,17,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 3 stack
-    chassis.swingToHeading(50,lemlib::DriveSide::RIGHT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=3}); //Swings into 3 stack
+    chassis.moveToPoint(0,19,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=3}); //Drives towards 3 stack
+    chassis.swingToHeading(35,lemlib::DriveSide::RIGHT,500,{.maxSpeed=127,.minSpeed=50,.earlyExitRange=3}); //Swings into 3 stack
     Matchload.set_value(1);
     Matchload.set_value(1);
     chassis.swingToHeading(107,lemlib::DriveSide::RIGHT,500); //Turns to the bottom right corner
     chassis.moveToPoint(36,12,1000); //Moves infront of long goal
     chassis.turnToHeading(176,500);//Turns to long goal
-    chassis.moveToPoint(37,27,1000,{.forwards=false}); //Backs into long goal
+    chassis.moveToPoint(37.2,27.1,900,{.forwards=false}); //Backs into long goal
     chassis.waitUntil(15);
     intakeTop.move(127);
     Matchload.set_value(0);
-    pros::delay(1200); //Waits for intake to score
+    pros::delay(1100); //Waits for intake to score
     intake.move(0);
-    chassis.moveToPoint(38.7,13.6,700); //Moves out of long goal
-    chassis.turnToHeading(266,500); //Turns to ally area
-    chassis.moveToPoint(47.4,10.5,700,{false});
+    chassis.moveToPoint(38.7,11.4,700); //Moves out of long goal
+    chassis.turnToHeading(265,500); //Turns to ally area
+    chassis.moveToPoint(48.5,13,700,{false});
     chassis.turnToHeading(178,500); //Turns into ally
-    chassis.moveToPoint(46.2,43,1000,{false}); //Moves into ally
+    chassis.moveToPoint(48,43,1000,{false, }); //Moves into ally
     Descore.set_value(0);
     Matchload.set_value(1);
     chassis.swingToHeading(200,lemlib::DriveSide::RIGHT,500,{.minSpeed=100}); //Swings to lock
-    
+
 }
 
 /**
@@ -173,7 +173,7 @@ void opcontrol() {
             intake.move(127);
         }
         else if (master.get_digital(DIGITAL_L2)) {
-            intakeFront.move(127);
+            intakeFront.move(110);
         }
         else {
             intake.move(0);

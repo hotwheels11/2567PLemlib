@@ -191,7 +191,7 @@ void opcontrol() {
             intake.move(127);
         }
         else if (master.get_digital(DIGITAL_L2)) {
-            intakeFront.move(127);
+            intakeFront.move(110);
         }
         else {
             intake.move(0);
