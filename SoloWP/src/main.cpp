@@ -11,7 +11,7 @@ void initialize() {
     //pros::lcd::initialize();
 	chassis.calibrate();// make sure chassis is ready
     pros::Task coordDisplayTask(Coords);
-    chassis.setPose(0, 0, 270);
+    chassis.setPose(0, 0, 0);
 }
 /*
 inline void intakeManagementSystem(void*) {
@@ -80,58 +80,58 @@ void competition_initialize() {
  */
 
 void autonomous() {
-    SnapshotResult res = do_snapshot(Quadrant::ANY); //Dih reset 
-    pros::delay(75);
     Descore.set_value(1);
     intakeFront.move(127);
-    chassis.moveToPoint(-4.5, -63.1, 400,{.maxSpeed=127,}); //Pushes Robot
-    chassis.moveToPoint(51,-63,1800,{.forwards=false,.maxSpeed=100}); //Reverses to Matchload
-    chassis.turnToHeading(-182,450,{.minSpeed=20,.earlyExitRange=3}); //Turns to face Matchload
-    Matchload.set_value(1);
-    chassis.moveToPoint(53,-76.5,1150,{.maxSpeed=60}); //Matchload 1
+    chassis.moveToPoint(0, 7.5, 500,{.maxSpeed=127}); //Pushes Robot
     intakeFront.move(127);
-    chassis.moveToPoint(54,-40,1300,{.forwards=false,.maxSpeed=80}); // Scores in Goal 1
+    chassis.moveToPoint(0,-48.2,1780,{.forwards=false,.maxSpeed=100}); //Reverses to Matchload
+    intakeFront.move(127);
+    chassis.turnToHeading(-90,510,{.minSpeed=20}); //Turns to face Matchload
+    Matchload.set_value(1);
+    chassis.moveToPoint(-12.6,-49.7,1210,{.maxSpeed=60}); //Matchload 1
+    intakeFront.move(127);
+    chassis.moveToPoint(25,-50.56,1100,{.forwards=false,.maxSpeed=80}); // Scores in Goal 1
     intake.move(0);
-    chassis.waitUntil(25);
+    chassis.waitUntil(25.5);
     intake.move(127);
     chassis.waitUntilDone();
-    pros::delay(700);
+    pros::delay(730);
     intakeTop.move(0);
     Matchload.set_value(0);
-    chassis.moveToPoint(53.8,-54,500,{.maxSpeed=110,.minSpeed=50,.earlyExitRange=2}); //Drives out of goal
+    chassis.moveToPoint(10,-48.4,500,{.maxSpeed=110,.minSpeed=50,.earlyExitRange=2}); //Drives out of goal
     intake.move(-127);
     pros::delay(200);
     intakeTop.move(0);
     intakeFront.move(127);
-    chassis.turnToHeading(307,600,{.minSpeed=50,.earlyExitRange=4}); //turns to 3 stack
-    chassis.moveToPoint(24.6,-38,1000,{.maxSpeed=110,.minSpeed=50,.earlyExitRange=4}); //Goes to 3 stack
-    chassis.waitUntil(15.5);
-    Matchload.set_value(1);
-    chassis.turnToHeading(268,400,{}); //Turns to 3 stack #2
+    chassis.turnToHeading(37.5,500); //turns to 3 stack
+    chassis.moveToPoint(25.3,-18.8,900,{.minSpeed=50,.earlyExitRange=2}); //Goes to 3 stack
+    chassis.turnToHeading(0.67,340,{}); //Turns to 3 stack #2
     chassis.waitUntilDone();
-    Matchload.set_value(0);
-    chassis.moveToPoint(-20,-38,1200,{.maxSpeed=110,.minSpeed=50,.earlyExitRange=4}); //Drives to 3 stack #2
-    chassis.waitUntil(28);
+    chassis.moveToPoint(25,24.6,1200,{.maxSpeed=110,.minSpeed=50,.earlyExitRange=4}); //Drives to 3 stack #2
+    chassis.waitUntil(29);
     Matchload.set_value(1);
-    chassis.turnToHeading(232,500,{.minSpeed=40,.earlyExitRange=3}); //Turns to middle goal
-    chassis.moveToPoint(-8.75,-27,800,{false,110}); //Reverses into middle goal
-    intake.move(-127);
-    pros::delay(200);
+    chassis.turnToHeading(-49,400); //Turns to middle goal
+    chassis.moveToPoint(36.05,11,750,{false,110}); //Reverses into middle goal
+    pros::delay(50);
+    intake.move(-100);
+    pros::delay(120);
     intake.move(0);
     middleGoal.set_value(1);
     chassis.waitUntilDone();
-    intakeTop.move(43);
-    intakeFront.move(80); //Scores in middle
-    pros::delay(1000);
+    intakeTop.move(40);
+    intakeFront.move(87); //Scores in middle
+    pros::delay(1150);
     intake.move(0);
     middleGoal.set_value(0);
-    chassis.moveToPoint(-46.25,-64,1200,{.minSpeed=40,.earlyExitRange=4}); //Drives infront matchload
+    chassis.moveToPoint(-3.4,49.5,1220); //Drives infront matchload
+    Matchload.set_value(0);
     intake.move(0);
-    chassis.turnToHeading(182,500,{.minSpeed=40,.earlyExitRange=3}); //Turns infront of matchlaod #2
-    chassis.moveToPoint(-44.9,-83,1100,{.maxSpeed=80}); //Goes into matchload #2
+    chassis.turnToHeading(-90,480); //Turns infront of matchlaod #2
+    Matchload.set_value(1);
+    chassis.moveToPoint(-18.6,48,1100,{.maxSpeed=80}); //Goes into matchload #2
     intakeFront.move(127);
-    chassis.moveToPoint(-43.7,-40,1000,{false}); //Backs into long goal and scores
-    chassis.waitUntil(23);
+    chassis.moveToPoint(25,46.5,1050,{false}); //Backs into long goal and scores
+    chassis.waitUntil(24.5);
     intake.move(127);
     descore++;
 }

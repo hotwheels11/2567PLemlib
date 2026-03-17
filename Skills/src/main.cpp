@@ -193,14 +193,14 @@ void autonomous() {
     chassis.setPose(0, 0, 0);
     Descore.set_value(1);
     intakeFront.move(127);
-    chassis.moveToPoint(0,15.25,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 4 stack
-    chassis.swingToHeading(-40,lemlib::DriveSide::LEFT,460,{.maxSpeed=127}); //Swings into 4 stack
+    chassis.moveToPoint(0,15.12,500,{.maxSpeed=127,.minSpeed=20,.earlyExitRange=2}); //Drives towards 4 stack
+    chassis.swingToHeading(-39,lemlib::DriveSide::LEFT,460,{.maxSpeed=127}); //Swings into 4 stack
     chassis.moveToPoint(-10,21.5,820); //Drives into 4 stack
-    chassis.waitUntil(10);
+    chassis.waitUntil(9);
     intakeFront.move(0);
     chassis.turnToHeading(-133,500); //Turns to Middle Goal
     intake.move(-30);
-    chassis.moveToPoint(9.3,36.8,900,{.forwards=false}); //Backs into middle goal
+    chassis.moveToPoint(9.6,37,910,{.forwards=false}); //Backs into middle goal
     Matchload.set_value(1);
     intake.move(0);
     chassis.waitUntilDone();
@@ -209,7 +209,7 @@ void autonomous() {
     Matchload.set_value(0);
     intakeFront.move(100);
     pros::delay(1000);
-    chassis.moveToPoint(-29.8,-1.5,1200); //Drives to matchload #1
+    chassis.moveToPoint(-28.3,-1.5,1200); //Drives to matchload #1
     intake.move(-127);
     pros::delay(100);
     intake.move(127);
@@ -218,56 +218,57 @@ void autonomous() {
     pros::delay(200);
     intake.move(0);
     intakeFront.move(127);
-    chassis.moveToPoint(-30.8,-17.8,1700,{true,50}); //Goes into matchload #1
+    chassis.moveToPoint(-28.9,-16.5,1900,{true,50}); //Goes into matchload #1
     chassis.waitUntil(5);
     middleGoal.set_value(0);
-    chassis.moveToPoint(-31,-0,800,{.forwards=false}); //Backs out from Matchload #1
+    chassis.moveToPoint(-29,-0,800,{.forwards=false}); //Backs out from Matchload #1
     chassis.waitUntilDone();
     Matchload.set_value(0);
-    chassis.turnToHeading(-50,600); //Turns to Ally
-    chassis.moveToPoint(-46.3,14,1000); //Drives before ally
+    chassis.turnToHeading(-49,600); //Turns to Ally
+    chassis.moveToPoint(-44,14,1000); //Drives before ally
     intakeFront.move(0);
     chassis.turnToHeading(-1,350); //Turns into ally
     middleGoalDescore.set_value(1);
-    chassis.moveToPoint(-48.5,90,2200,{.maxSpeed=90}); //Drives down ally
+    chassis.moveToPoint(-46.3,90,2200,{.maxSpeed=90}); //Drives down ally
     chassis.turnToHeading(-90,700); //turns to long goal
     middleGoalDescore.set_value(0);
-    chassis.moveToPoint(-34,88.5,1000,{.forwards=false}); //Back up perpendicular to long goal
+    chassis.moveToPoint(-32.2,88.5,1000,{.forwards=false}); //Back up perpendicular to long goal
     chassis.turnToHeading(-1.5,700); //Backs into long goal
-    chassis.moveToPoint(-35,70,750,{.forwards=false,.maxSpeed=50}); //Backs into long goal
+    chassis.moveToPoint(-33.7,70,750,{.forwards=false,.maxSpeed=50}); //Backs into long goal
     chassis.waitUntil(10);
     intake.move(127);
-    pros::delay(1850);
+    pros::delay(1860);
     intakeTop.move(0);
     Matchload.set_value(1);
-    chassis.moveToPoint(-37.25,115,2600,{.maxSpeed=40}); //Drives into matchload #2
+    chassis.moveToPoint(-35,113.5,2850,{.maxSpeed=40}); //Drives into matchload #2
     chassis.waitUntil(23);
     chassis.waitUntilDone();
-    chassis.moveToPoint(-35.85,64.67,1250,{.forwards=false,.maxSpeed=50}); //backs to long goal #1 Second time
+    chassis.moveToPoint(-34,64.67,1200,{.forwards=false,.maxSpeed=50}); //backs to long goal #1 Second time
     chassis.waitUntil(2);
     intake.move(-127);
     pros::delay(50);
     intake.move(0);
     chassis.waitUntilDone();
     intake.move(127);
-    pros::delay(1350);
+    pros::delay(1500);
     intakeTop.move(0);
-    chassis.moveToPoint(-33.5,107,800); // Drive out of long goal
+    chassis.moveToPoint(-33.5,105,800); // Drive out of long goal
     middleGoalDescore.set_value(0);
     Matchload.set_value(0);
     chassis.turnToHeading(70,500); //TUrns to in the direction of blue park
     middleGoalDescore.set_value(1);
-    chassis.moveToPoint(-5.25,120.75,1100); //Point before swing for blue park
+    chassis.moveToPoint(-5,120.65,1100); //Point before swing for blue park
+    intake.move(127);
     chassis.swingToHeading(85,lemlib::DriveSide::RIGHT,500,{.minSpeed=80}); //Swings to blue park
+    intake.move(0);
     middleGoalDescore.set_value(0);
     chassis.waitUntilDone();
     Matchload.set_value(1);
     pros::delay(250);
-    chassis.moveToPoint(38,125.1,4000,{.maxSpeed=127,.minSpeed=127}); //Driving through park
+    chassis.moveToPoint(36,125.22,4000,{.maxSpeed=90,.minSpeed=90}); //Driving through park
+    intakeFront.move(127);
     chassis.waitUntil(0.65);
     Matchload.set_value(0);
-    chassis.waitUntil(39);
-    //Matchload.set_value(1);
     chassis.swingToHeading(180,lemlib::DriveSide::RIGHT,1000); //sets up for dih reset
     chassis.waitUntil(30);
     Matchload.set_value(0);
@@ -276,45 +277,42 @@ void autonomous() {
     chassis.setPose(0,0,chassis.getPose().theta);
     pros::delay(20);
     SnapshotResult res = do_snapshot(Quadrant::ANY); //Dih reset 
-    pros::delay(75);
+    pros::delay(120);
     if (res.ok) {
         intake.move(0);
         intakeFront.move(0); //Verifies I can get control of the intake in this while loop
         intakeTop.move(0);
         intakeFront.move(127);
-        chassis.turnToHeading(230,500); //Turns in prep to collect 4 balls
-        chassis.moveToPoint(13,33,1000); //Moves infront of 4 stack
+        chassis.turnToHeading(230,500);//Turns in prep to collect 4 balls
+        chassis.moveToPoint(13,33,1000);  //Moves infront of 4 stack
         chassis.turnToHeading(137,500); //Turns to 4 stack
         chassis.moveToPoint(24,23.7,1000); //collects 4 stack
-        chassis.waitUntil(4);
+        chassis.waitUntil(5);
         Matchload.set_value(1);
         chassis.waitUntilDone();
         chassis.turnToHeading(41,500); //Turns to middle goal
         intake.move(0);
         chassis.moveToPoint(7.5,7.2,850,{.forwards=false,.maxSpeed=80}); //Backs into middle goal
-        intake.move(-35);
+        intake.move(-43);
         chassis.waitUntil(2.5);
         intake.move(0);
         chassis.waitUntilDone();
         middleGoal.set_value(1); //Starts the scoring to middle goal
         pros::delay(50);
         intakeTop.move(30);
-        intakeFront.move(70);
-        pros::delay(2100);
+        intakeFront.move(75);
+        pros::delay(2240);
         middleGoal.set_value(0);
         intake.move(0);
-        chassis.moveToPoint(45.85,50,1100); //Drives infront of Matchload #3
+        chassis.moveToPoint(45.6,50,1100); //Drives infront of Matchload #3
+        Matchload.set_value(0);
         intake.move(127);
         chassis.waitUntil(5);
         intake.move(127);
-        chassis.waitUntil(8);
-        middleGoalDescore.set_value(1);
         chassis.turnToHeading(-3,400); //Turns to matchload #3
-        middleGoalDescore.set_value(0);
-        chassis.waitUntilDone();
         Matchload.set_value(1);
-        pros::delay(200);
-        chassis.moveToPoint(45.35,65,1900,{true,60}); //Goes into matchload #3
+        chassis.waitUntilDone();
+        chassis.moveToPoint(45.1,64.5,1900,{true,90}); //Goes into matchload #3
         intakeTop.move(0);
         intakeFront.move(127);
         chassis.moveToPoint(43.5,45.7,750,{.forwards=false}); //Backs out from Matchload #3
@@ -322,21 +320,23 @@ void autonomous() {
         Matchload.set_value(0);
         intakeFront.move(0);
         chassis.turnToHeading(135,500); //Turns to Ally
-        chassis.moveToPoint(62,37.6,1000); //Drives before ally
+        chassis.moveToPoint(61.4,37.6,1000); //Drives before ally
         chassis.turnToHeading(176,500); //Turns into ally
-        chassis.moveToPoint(67.2,-41.2,2300,{.maxSpeed=100}); //Drives down ally
+        chassis.moveToPoint(68.25,-41.2,2300,{.maxSpeed=100}); //Drives down ally
+        middleGoalDescore.set_value(1);
         chassis.turnToHeading(85,500);
-        chassis.moveToPoint(51.15,-40.4,1000,{.forwards=false}); //Back up perpendicular to long goal
+        middleGoalDescore.set_value(0);
+        chassis.moveToPoint(52.5,-40.4,1000,{.forwards=false}); //Back up perpendicular to long goal
         chassis.turnToHeading(174,500); //Turns to long goal
-        chassis.moveToPoint(53.15,-24,1000,{.forwards=false,.maxSpeed=50}); //Backs into long goal
+        chassis.moveToPoint(54.5,-24,1000,{.forwards=false,.maxSpeed=50}); //Backs into long goal
         chassis.waitUntil(18);
         intake.move(127);
         pros::delay(2000);
-        chassis.moveToPoint(55.85,-64,3000,{.maxSpeed=40}); //Drives into matchload #4
+        chassis.moveToPoint(56.5,-63.85,3000,{.maxSpeed=40}); //Drives into matchload #4
         intakeTop.move(0);
         Matchload.set_value(1);
         chassis.waitUntil(23);
-        chassis.moveToPoint(53.15,-24,1250,{.forwards=false,.maxSpeed=50}); //backs to long goal #2 Second time
+        chassis.moveToPoint(54,-24,1250,{.forwards=false,.maxSpeed=50}); //backs to long goal #2 Second time
         chassis.waitUntil(2);
         intake.move(-127);
         pros::delay(50);
@@ -348,10 +348,10 @@ void autonomous() {
         Matchload.set_value(0);
         chassis.moveToPoint(54.4,-43,800); // Drive out of long goal
         chassis.turnToHeading(226,500); //TUrns to in the direction of red park
-        chassis.moveToPoint(25.5,-71,1000); //Point before swing for red park
+        chassis.moveToPoint(25.9,-71.25,1000); //Point before swing for red park
         chassis.swingToHeading(266,lemlib::DriveSide::RIGHT,500);
-        chassis.waitUntilDone();
         Matchload.set_value(1);
+        chassis.waitUntilDone();
         pros::delay(250);
         chassis.moveToPoint(5,-70,3000,{.maxSpeed=127,.minSpeed=127}); //Driving through park
         intake.move(0);
@@ -433,7 +433,7 @@ void opcontrol() {
         }
         else if (master.get_digital(DIGITAL_L2)) {
             intakeTop.move(40);
-            intakeFront.move(65);
+            intakeFront.move(70);
         }
         else {
             intake.move(0);

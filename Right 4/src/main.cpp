@@ -99,7 +99,7 @@ void autonomous() {
     chassis.turnToHeading(265,500); //Turns to ally area
     chassis.moveToPoint(48.5,13,700,{false});
     chassis.turnToHeading(178,500); //Turns into ally
-    chassis.moveToPoint(48,43,1000,{false, }); //Moves into ally
+    chassis.moveToPoint(48,43,1000,{.maxSpeed=70}); //Moves into ally
     Descore.set_value(0);
     Matchload.set_value(1);
     chassis.swingToHeading(200,lemlib::DriveSide::RIGHT,500,{.minSpeed=100}); //Swings to lock
