@@ -380,7 +380,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 bool middleGoalState = false;
-
+int n = 0;
 bool middleGoalManual = false;
 inline int middleGoalDescoreState = 0;
 void opcontrol() {
@@ -395,52 +395,31 @@ void opcontrol() {
         int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
         chassis.tank(leftY, rightY);
 
-        // ===== DESCORE TOGGLE (B) =====
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-            descore++;
+        if(master.get_digital(DIGITAL_X)){
+            chassis.cancelAllMotions();
+            pros::delay(100);
+            chassis.setPose(0,0,0);
+            pros::delay(50);
+            chassis.moveToPoint(0,168+n,5000,{.maxSpeed=80});
+            n += 20;
         }
-        Descore.set_value(descore % 2 == 1);
-
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
-            middleGoalDescoreState++;
+        if(master.get_digital(DIGITAL_A)){
+            chassis.cancelAllMotions();
+            pros::delay(100);
+            chassis.setPose(0,0,0);
+            pros::delay(50);
+            chassis.turnToHeading(90,1000);
         }
-        middleGoalDescore.set_value(middleGoalDescoreState % 2 == 1);
-        // ===== MATCHLOAD TOGGLE (Y) =====
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
-            MatchloadMech++;
+        if(master.get_digital(DIGITAL_Y)){
+            chassis.cancelAllMotions();
+            pros::delay(100);
+            chassis.setPose(0,0,0);
+            pros::delay(50);
+            chassis.turnToHeading(-90,1000);
         }
-        Matchload.set_value(MatchloadMech % 2 == 0);
-
-        // ===== MIDDLE GOAL MANUAL TOGGLE (DOWN) =====
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-            middleGoalManual = !middleGoalManual;
-        }
-
-        // ===== MIDDLE GOAL COMMAND =====
-        bool middleGoalCommand =
-            middleGoalManual || master.get_digital(DIGITAL_L2);
-            middleGoal.set_value(middleGoalCommand);
-
-        // ===== INTAKE CONTROL =====
-        if (master.get_digital(DIGITAL_R1)) {
-            intakeFront.move(127);
-        }
-        else if (master.get_digital(DIGITAL_R2)) {
-            intake.move(-127);
-        }
-        else if (master.get_digital(DIGITAL_L1)) {
-            intake.move(127);
-        }
-        else if (master.get_digital(DIGITAL_L2)) {
-            intakeTop.move(40);
-            intakeFront.move(70);
-        }
-        else {
-            intake.move(0);
-        }
-        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
-            chassis.setPose(0,0,chassis.getPose().theta);
-            do_snapshot(Quadrant::ANY);
+        if(master.get_digital(DIGITAL_B)){
+            chassis.cancelMotion();
+            chassis.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
         }
 
         pros::delay(20);

@@ -119,12 +119,11 @@ void autonomous() {
     intakeFront.move(100);
     chassis.waitUntilDone();
     pros::delay(1000);
-    chassis.moveToPoint(-17.6,11,1100); //Drives towards matchload and long goal
+    chassis.moveToPoint(-15,11,1100); //Drives towards matchload and long goal
     middleGoal.set_value(0);
     chassis.turnToHeading(178,350); //Turns to the back of long goal
     Descore.set_value(0);
-    chassis.moveToPoint(-21.4,40,1200,{.forwards=false,.maxSpeed=90}); //Pushes bloncks into long goal
-    chassis.swingToHeading(191,lemlib::DriveSide::RIGHT,1200,{.minSpeed=50}); //Swings to get stuck into long goal
+    chassis.moveToPoint(-19,40,1200,{.forwards=false,.maxSpeed=90}); //Pushes bloncks into long goal
     MatchloadMech++;
 }
 
