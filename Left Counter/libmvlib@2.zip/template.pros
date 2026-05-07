@@ -1,0 +1,25 @@
+{
+    "py/object": "pros.conductor.templates.external_template.ExternalTemplate",
+    "py/state": {
+        "metadata": {},
+        "name": "libmvlib",
+        "supported_kernels": "^4.2.1",
+        "system_files": [
+            "include/mvlib/renderHelper.hpp",
+            "include/mvlib/Optional/customOdom.hpp",
+            "include/mvlib/Optional/ezTemplate.hpp",
+            "include/mvlib/waypoint.hpp",
+            "include/mvlib/telemetry.hpp",
+            "include/mvlib/Optional/okapi.hpp",
+            "include/mvlib/literals.hpp",
+            "include/mvlib/api.hpp",
+            "include/mvlib/core.hpp",
+            "firmware/libmvlib.a",
+            "include/mvlib/Optional/lemlib.hpp",
+            "include/mvlib/private/forwardLogMacros.h"
+        ],
+        "target": "v5",
+        "user_files": [],
+        "version": "2.0.1"
+    }
+}

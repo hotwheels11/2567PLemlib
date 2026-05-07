@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Left Counter",
+    "project_name": "TEST",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -633,6 +633,32 @@
         "user_files": [],
         "version": "9.2.0"
       },
+      "libmvlib": {
+        "location": "/Users/loganschrei/Library/Application Support/PROS/templates/libmvlib@2.0.1",
+        "metadata": {
+          "origin": "local"
+        },
+        "name": "libmvlib",
+        "py/object": "pros.conductor.templates.local_template.LocalTemplate",
+        "supported_kernels": "^4.2.1",
+        "system_files": [
+          "include/mvlib/renderHelper.hpp",
+          "include/mvlib/Optional/customOdom.hpp",
+          "include/mvlib/Optional/ezTemplate.hpp",
+          "include/mvlib/waypoint.hpp",
+          "include/mvlib/telemetry.hpp",
+          "include/mvlib/Optional/okapi.hpp",
+          "include/mvlib/literals.hpp",
+          "include/mvlib/api.hpp",
+          "include/mvlib/core.hpp",
+          "firmware/libmvlib.a",
+          "include/mvlib/Optional/lemlib.hpp",
+          "include/mvlib/private/forwardLogMacros.h"
+        ],
+        "target": "v5",
+        "user_files": [],
+        "version": "2.0.1"
+      },
       "titanselect": {
         "location": "/Users/loganschrei/Library/Application Support/PROS/templates/titanselect@1.0.0",
         "metadata": {
@@ -655,7 +681,7 @@
       "after": "run",
       "description": "This Code contains all autos we require.",
       "icon": "X",
-      "slot": 6
+      "slot": 8
     },
     "use_early_access": false
   }
